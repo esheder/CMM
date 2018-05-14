@@ -1,0 +1,136 @@
+\documentclass[a4paper,letterpaper,12pt,oneside,draft]{article}
+
+\usepackage{geometry}
+\geometry{margin=2cm,hoffset=0in, %
+    headheight=0.5\baselineskip}
+\usepackage{times}
+\pagestyle{plain}
+\usepackage{setspace}
+\onehalfspacing
+
+\input{setup.tex}
+
+\newcommand{\zth}{0th }
+\newcommand{\fst}{1st }
+\newcommand{\snd}{2nd }
+\newcommand{\OpL}{\mathscr{L}}
+\newcommand{\OpT}{\mathscr{T}}
+\newcommand{\OpD}{\mathcal{D}}
+\newcommand{\MG}{MG }
+
+\newcommand{\allspace}{\ensuremath{\mathbb{R}^3}}
+\newcommand{\norm}[1]{\left| #1 \right|}
+\newcommand{\bracket}[1]{\ensuremath{\left\langle #1 \right\rangle}}
+\newcommand{\bracketv}[1]{\bracket{#1}_V}
+\newcommand{\bracketvo}[1]{\ensuremath{\bracket{#1}_{V,\Omega}}}
+\newcommand{\bracketR}[1]{\ensuremath{\bracket{#1}_{\allspace}}}
+\newcommand{\bracketex}[2][V]{\ensuremath{\bracket{#2}_{#1}}}
+\newcommand{\bracketsa}[1]{\bracketex[\allspace,\Omega]{#1}}
+\newcommand{\rdotJ}{\bracketR{\vec{r}\cdot\vec{J}}}
+\newcommand{\rsqp}{\bracketR{r^2\phi}}
+\newcommand{\intg}[2][g]{\ensuremath{\int_{E_{#1}}^{E_{#1-1}} #2 dE}}
+\newcommand{\intcg}[2][g]{\ensuremath{\int_{E_{#1}}^{\infty} #2 dE}}
+\newcommand{\intener}[2][]{\int_0^\infty{#2}dE#1}
+\newcommand{\sumener}[2][]{\sum_{g#1=1}^{G}{#2}}
+\newcommand{\vr}{\ensuremath{\vec{r}}}
+\newcommand{\dvr}{\left(\vr-\vr_0\right)}
+\newcommand{\psif}[1][]{\psi(\vr,\Omega#1,E#1)}
+\newcommand{\dvrdotJ}{\bracketR{\dvr\cdot\vec{J}}}
+\newcommand{\dvrdotJg}{\bracketR{\dvr\cdot\vec{J_g}}}
+\newcommand{\dvrsqp}{\bracketR{\dvr^2\phi}}
+\newcommand{\dvrsqpg}{\bracketR{\dvr^2\phi_g}}
+\newcommand{\regint}[1]{\ensuremath{\int_{V_0} #1 dV_0}}
+
+\counterwithin{equation}{section}
+
+\title{Defining a diffusion coefficient for the finite homogeneous sphere problem: Exploratory notes}
+\author{Eshed Magali \\ Edward W. Larsen}
+\date{\today}
+
+
+\widowpenalty10000
+\clubpenalty10000
+
+\begin{document}
+\maketitle
+
+\section{Premise}
+    The premise is that of a finite homogeneous sphere of a parameter radius $R$ inside an infinite vacuum universe. The sphere is made of a fissile material, and thus has an eigenfunction flux for the $k$-eigenvalue of the following BTE with its BCs:
+    
+    \begin{align}
+        \label{eq:BTE}
+        \forall r<R,\quad & \Omega\cdot\nabla\psif + \Sigma_t(E)\psif = \intener[']{\int_{4\pi}\Sigma_{s}(E'\to E,\Omega\cdot\Omega')\psif[']d\Omega'} \\ \nonumber
+        & + \frac{\chi(E)}{4\pi k}\intener[']{\nu\Sigma_f(E')\int_{4\pi}\psif[']d\Omega'} \\
+        \label{eq:BTE:BC}
+        \forall\  \Omega\cdot\hat{r}<0 \quad &
+        \psi(R,\Omega,E) = 0
+    \end{align}
+    From symmetry we know that the $\vr$ dependence is actually just an $r$ dependence.
+    
+    Our objective is to find a diffusion coefficient such that the homogeneous sphere diffusion problem will preserve the physics of the transport problem. 
+    First, one must define approximate boundary conditions, which are usually picked such that the partial current in the diffusion problem is 0 for the incoming partial current on the boundary.
+    
+    We hope that the CMM's quantity of interest will be useful in this problem. 
+    Therefore we hope that preserving the mean $\rdotJ$ value will yield results that have a similar eigenvalue and shape of the scalar flux. 
+    The diffusion equation can be written as:
+    
+    \begin{gather}
+        \label{eq:Diff}
+        \forall r<R, \quad-\nabla D_g\nabla\phi_g(\vr) + \Sigma_{t,g}\phi_g(\vr) = \sumener[']{\Sigma_{s0}^{g'\to g}\phi_{g'}(\vr)} + \frac{\chi_g}{k}\sumener[']{\nu\Sigma_{f,g'}\phi_{g'}(\vr)} \\
+        \label{eq:Diff:BC}
+        \phi_g(R) - 3D\nabla\phi_g(R) = J^+_g(R) = 0
+    \end{gather}
+    
+    Remember that $R$ is a parameter of the problem. We expect that as $R\to\infty$ we would get the original CMM results, as the medium becomes an infinite homogeneous medium.
+    
+    \section{Solution}
+    We can actually solve the flux everywhere in space, but what we really need is to solve the Green's function everywhere in space. 
+    This I know not how to do. 
+    This is the major complication introduced in this problem: the diffusion source is no longer a point source or equivalent to the contribution of each point source. 
+    Even so, this problem is very easy numerically, so it should be fairly straightforward to test.
+    
+    \subsection{Solving through inverse operators}
+    Notice that we can pull a very similar trick to the one we pulled in obtaining the migration moments of the heterogeneous transport problem for single assemblies. We have per the definition:
+    
+    \begin{align}
+    \label{eq:def:Moment1}
+        \Phi_{1,g}^D & = \int_{V_0}\int_{V}F_D(\vr_0)\dvr\cdot \vec{J}_g(\vr;\vr_0)dVdV_0 \\
+        F_D(\vr_0) & = \frac{1}{k}\sumener[']{\nu\Sigma_{f,g'}\phi_{g'}(\vr_0)}
+    \end{align}
+    where $\phi_g(\vr;\vr_0)$ is the Green's function of the diffusion problem. This is written explicitly as:
+    
+    \begin{gather}
+        \label{eq:Diff:Green}
+        \forall r<R, \quad-\nabla D_g\nabla\phi_g(\vr;\vr_0) + \Sigma_{t,g}\phi_g(\vr;\vr_0) = \sumener[']{\Sigma_{s0}^{g'\to g}\phi_{g'}(\vr;\vr_0)} + \chi_g\delta\dvr \\
+        \label{eq:Diff:Green:BC}
+        \phi_g(R;\vr_0) - 3D\nabla\phi_g(R;\vr_0) = J^+_g(R) = 0
+    \end{gather}
+    We now define the diffusion operator:
+    
+    \begin{equation}
+    \label{eq:def:DiffOp}
+    \left(\OpD\vec{\phi}\right)_g(\vr) = -\nabla D_g \nabla \phi_g(\vr) + \Sigma_{t,g}\phi_g(\vr) - \sumener[']{\Sigma_{s0}^{g'\to g}\phi_{g'}(\vr)}
+    \end{equation}
+    Using this operator we now define its inverse operator on our problem, which does include the boundary conditions. Basically we can note that $\OpD^{-1}F$ is the solution of the diffusion problem for a source distributed as $F(\vr,E)$ over the ball of radius $R$, with vacuum boundary conditions.
+    
+    Since the $\OpD$ operator does not interact with $\vr_0$ dependences, we can simplify \cref{eq:def:Moment1}:
+    
+    \begin{multline}
+    \label{eq:Moment1}
+        \Phi_{1,g}^D = -\int_{V_0}\int_{V} F_D(\vr_0)\dvr\cdot D_g\nabla\phi_g(\vr;\vr_0) dVdV_0 \\
+        = D_g\int_V\int_{V_0} F(\vr_0)\vr_0\cdot\nabla \OpD^{-1}\chi\delta\dvr dV_0dV - D_g\int_V\int_{V_0}F(\vr_0)\vr\cdot\nabla\OpD^{-1}\chi\delta\dvr dV_0dV \\
+        = D_g \int_{V}\nabla \cdot \OpD^{-1} \chi\vr F(\vr) dV - D_g\int_{V} \vr\cdot \nabla\OpD^{-1}\chi FdV \\
+        = D_g \int_{\partial V} \OpD^{-1}\chi\vr Fd\vec{A} - D_g\int_{V} \vr\cdot \nabla\OpD^{-1}\chi FdV \\
+        = D_g \int_{\partial V} \OpD^{-1}\chi\vr F(\vr)d\vec{A} - D_g\int_{\partial V} \vr \phi_g(\vr)d\vec{A} + 3D_g\int_V\phi_g(\vr)dV \\
+        = D_g \int_{\partial V} \OpD^{-1}\chi\vr F(\vr)d\vec{A} - 3D_g\phi_g(R)V + 3D_g\int_V\phi_g(\vr)dV
+    \end{multline}
+    which can be numerically evaluated by solving 4 diffusion problems on the finite sphere. Notice that since $\OpD$ depends on the diffusion coefficient matrix $D$, this moment is non-linear in the diffusion matrix. For an infinite homogeneous medium, as $R\to\infty$, the first two terms drop. Also, $F(\vr)$ is flat, and the second term is just the known value from CMM.
+    
+    Now all one must do is find a diffusion matrix $D$ such that $\Phi_{1,g}^D=\Phi_{1,g}^T$, where $\Phi_{1,g}^T$ is the tallied or calculated value of the migration for the transport problem. 
+    
+    This method gives us some insight for how the colorset problem could be solved for any problem. Similarly to the transport problem, we will have to solve the diffusion problem numerically, but this time we are only interested in finding homogenized diffusion coefficients that cause the preservation of known values. This is a system of non-linear equations. In general we could expect diffusion estimated boundary values and the need to solve these 4 diffusion equations for each iteration in the non-linear solver.
+    
+    \subsection{Solving through the known solution}
+    We know how to solve the diffusion eigenvalue problem for the one group problem. This allows us to know $F(\vr_0)$ explicitly, but I don't know how to solve the contribution of each point source, because the source isn't located at the center...
+
+\end{document}
