@@ -1,7 +1,6 @@
 
 import numpy as np
 from scipy.sparse.linalg import aslinearoperator
-#from scipy.sparse.linalg import spsolve as solve
 from scipy.sparse.linalg import bicgstab as solve
 
 class BCCLS:

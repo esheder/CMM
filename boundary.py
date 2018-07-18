@@ -69,6 +69,8 @@ def solve(reg, d, Jp):
     def residual(D):
         """Returns how close we are to convergence in each variable
 
+        D = Two dimensional diffusion coefficient matrix. First column is left region, second is right region.
+
         """
         n = D.shape[0]
         Dm, Dp = np.diag(D[:,0]), np.diag(D[:,1])
@@ -80,7 +82,9 @@ def solve(reg, d, Jp):
         return np.vstack((rm,rp)).T
     
     guess = np.ones((phi0m.shape[0],2))
-    return newton_krylov(residual, guess, method='lgmres')
+    sol = newton_krylov(residual, guess, method='lgmres')
+    print(residual(sol))
+    return sol
     
 
 if __name__ == '__main__':
