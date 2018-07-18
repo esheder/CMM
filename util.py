@@ -37,7 +37,7 @@ class BCCLS:
         
 
     def matvec(self, v):
-        """Matrix vector multiplication
+        """Matrix vector multiplication.
 
         """
         if v.shape[0] != 3*self.n:
