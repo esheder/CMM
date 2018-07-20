@@ -91,7 +91,7 @@ if __name__ == '__main__':
     from argparse import ArgumentParser as AP
 
     parser = AP(description="Solves the very specific problem")
-    parser.add_argument('-i', nargs = 2, default=['leftreg.dat.csv', 'rightreg.dat.csv'], help="CMM tally results")
+    parser.add_argument('-i', nargs = 2, default=['input/leftreg.dat.csv', 'input/rightreg.dat.csv'], help="CMM tally results")
     parser.add_argument('-o', help="Output file")
 
     args = parser.parse_args()
