@@ -7,10 +7,10 @@ well maintained open-source code project. Just not now.
 
 ## Includes:
 1. Two Region Boundary Source Problem
-  a. Initial mathematical writeup.
-  b. Python code to try to test the ideas
+   - Initial mathematical writeup.
+   - Python code to try to test the ideas
 2. Finite sphere model
-  a. Initial mathematical writeup
+   - Initial mathematical writeup
   
 ## Conclusions thus far:
 ### Methodology
