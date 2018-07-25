@@ -11,6 +11,8 @@
 
 \input{../setup.tex}
 
+\newcommand{\eec}{\;,}
+\newcommand{\eep}{\;.}
 \newcommand{\zth}{0th }
 \newcommand{\fst}{1st }
 \newcommand{\snd}{2nd }
@@ -26,7 +28,7 @@
 \newcommand{\bracketR}[1]{\ensuremath{\bracket{#1}_{\allspace}}}
 \newcommand{\bracketex}[2][V]{\ensuremath{\bracket{#2}_{#1}}}
 \newcommand{\bracketsa}[1]{\bracketex[\allspace,\Omega]{#1}}
-\newcommand{\rdotJ}{\bracketR{\vec{r}\cdot\vec{J}}}
+\newcommand{\rdotJ}[1][\allspace]{\bracketex[#1]{\vec{r}\cdot\vec{J}}}
 \newcommand{\rsqp}{\bracketR{r^2\phi}}
 \newcommand{\intg}[2][g]{\ensuremath{\int_{E_{#1}}^{E_{#1-1}} #2 dE}}
 \newcommand{\intcg}[2][g]{\ensuremath{\int_{E_{#1}}^{\infty} #2 dE}}
@@ -52,159 +54,146 @@
 \begin{document}
 \maketitle
 \section{Premise}
-    The premise is fairly simple. We consider a half-plane infinite slab (for $x>0$), with an input incoming source at $x=0$, of strength $\psi_b$. The half-plane is made of a non-fissile homogeneous material with a given set of macroscopic cross sections, with anisotropic scattering. One can consider this as a case that could arise, for example, at the reactor core. This can be written explicitly as:
-    
-    \begin{gather}
+    We consider a half-plane infinite slab (for $x>0$), with an input incoming source at $x=0$, of strength $\psi_b(\Omega,E)$. 
+    The half-plane is made of a non-fissile homogeneous material with a given set of macroscopic cross sections, with anisotropic scattering. 
+    This can be written explicitly as:
+    \begin{align}
+    \nonumber
+        \forall x>0,\quad \Omega\cdot\nabla\psif &+ \Sigma_t(E)\psif \eec \\ 
     \label{eq:BTE}
-        \forall x>0,\quad \Omega\cdot\nabla\psif + \Sigma_t(E)\psif = \frac{1}{4\pi}\int_0^\infty\int_{4\pi}\Sigma_{s}(E'\to E,\Omega\cdot\Omega')\psif[']d\Omega'dE' \\
+        =& \frac{1}{4\pi}\int_0^\infty\int_{4\pi}\Sigma_{s}(E'\to E,\Omega\cdot\Omega')\psif[']d\Omega'dE' \eec\\
     \label{eq:BTE:BC}
-        \forall\  \Omega\cdot\hat{x}>0\  \forall y\  \forall z, \quad 
-        \psi(0,y,z,\Omega,E) = \psi_b(\Omega,E)
-    \end{gather}
-    where from symmetry to translations in $y,z$, we know that the dependence on $\vr$ is actually a dependence on $x$.
+        \forall\  \Omega\cdot\hat{x}>0\  \forall y\  \forall z, \quad &
+        \psi(0,y,z,\Omega,E) = \psi_b(\Omega,E)\eec \\\nonumber
+        \lim\limits_{x\to\infty}&\psi(\vr,\Omega,E) = 0 \eep
+    \end{align}
+    The solution to the problem posed in \cref{eq:BTE,eq:BTE:BC} is symmetric to translations in $y,z$, since the boundary conditions and cross sections are all symmetric to those same translations.
     
-    Our objective is to find 2 homogenized diffusion coefficients, $D_1,D_2$, such that the 2-region homogenized diffusion problem will preserve the physics of the transport problem. Quantities of interest could be the reflected flux spectrum, the penetration depth (distance until the total flux drops to some fraction of its initial value) or otherwise. Our hope is that using something similar to CMM, where we preserve \rdotJ would yield good results. The diffusion equation can be written as:
-    
-    \begin{gather}
-    \label{eq:Diff}
-        \forall x>0, \quad-\nabla D_g(\vr)\nabla\phi_g(\vr) + \Sigma_{t,g}\phi_g(\vr) = \sum_{g'=1}^G\Sigma_{s0}^{g'\to g}\phi_{g'}(\vr) \\
-    \label{eq:Diff:BC}
-        \phi_g(0) - 3D(0)\nabla\phi_g(0) = J^+_g(0) = \intg{\int_{\Omega\cdot\hat{x}>0}\Omega\psi_b(\Omega,E)d\Omega}
-    \end{gather}
-    where the diffusion coefficient is defined to be a histogram of space:
-    
+    Say we are interested in modeling this system using only two sets of multigroup diffusion parameters. Specifically, let $d$ such that the entire half plane $x>0$ is split into two regions, $x\leq d$ and $x>d$.
+    We intend to use two sets of multigroup cross sections and diffusion coefficients, one for each of those regions. Once those parameters are set, this would define the following diffusion problem:
+    \begin{align}
+        \label{eq:Diff}
+            \forall x>0, \quad-\nabla D_g(\vr)\nabla\phi_g(\vr) + \Sigma_{t,g}(\vr)\phi_g(\vr) &= \sum_{g'=1}^G\Sigma_{s0}^{g'\to g}(\vr)\phi_{g'}(\vr) \eec\\
+        \label{eq:Diff:BC}
+            \phi_g(0) - 3D(0)\nabla\phi_g(0) &= \intg{\int_{\Omega\cdot\hat{x}>0}\Omega\psi_b(\Omega,E)d\Omega} \eec\\
+            \lim\limits_{x\to\infty}\phi_g(x) &= 0 \eec\\
+        \label{eq:Diff:IC}
+            \phi_g(d^-) &= \phi_g(d^+) \eec\\
+            \nonumber
+            \frac{d\phi_g}{dx}(d^-) &= \frac{d\phi_g}{dx}(d^+)\eec
+    \end{align}
+    where all of the multigroup parameters are histogram functions in space.
+    For example:
     \begin{equation}
-    \label{eq:DiffCoeff:heavyside}
-        D_g(\vr) = 
-        \begin{cases}
-            D_g^- & x < d \\
-            D_g^+ & x > d
-        \end{cases}
+        \label{eq:TotalXS}
+        \Sigma_{t,g}(\vr) = \begin{cases} \Sigma_{t,g}^1 & x\leq d \\ \Sigma_{t,g}^2 & x>d\end{cases}\eep
     \end{equation}
-    for some $d$ which will be a parameter of our problem. If $d\to\infty$ we expect the diffusion coefficient to be the same as the original CMM definition:
     
+    For now, let us assume flux weighted homogenization for the cross sections. Specifically, we assume:
+    \begin{align}
+        \phi_{g}^1 &= \int_{0}^{d}\intg{\phi(x,E)}dx \eec\\
+        \phi_{g}^2 &= \int_{d}^{\infty}\intg{\phi(x,E)}dx \eec\\
+        \Sigma_{t,g}^1 &= \frac{1}{\phi_g^1}\int_{0}^{d}\intg{\Sigma_t(E)\phi(x,E)}dx \eec\\
+        \Sigma_{t,g}^2 &= \frac{1}{\phi_g^2}\int_{d}^{\infty}\intg{\Sigma_t(E)\phi(x,E)}dx \eec\\
+        \Sigma_{s0,1}^{g'\to g} &= \frac{1}{\phi_g^1} \int_{0}^{d}\intg{\intg[g']{\Sigma_{s0}(E'\to E)\phi(x,E)}'}dx \eec\\
+        \Sigma_{s0,2}^{g'\to g} &= \frac{1}{\phi_g^2} \int_{d}^{\infty}\intg{\intg[g']{\Sigma_{s0}(E'\to E)\phi(x,E)}'}dx \eec
+    \end{align}
+    where $\phi(x,E)$ is the scalar flux solved from \cref{eq:BTE,eq:BTE:BC}.
+    Our objective is to find 2 homogenized diffusion coefficients, $D_1,D_2$, such that the 2-region homogenized diffusion problem will preserve the physics of the transport problem.
+    Our hope is that using something similar to CMM, where we preserve \rdotJ would yield good results. 
+    
+    The result of our derivation should reduce to the CMM results for $d\to\infty$:
     \begin{equation*}
-        D^-_g = \frac{\intg{\rdotJ(E)}}{3\intg{\bracket{\phi}(E)}}
+        D^1_g = \frac{\intg{\rdotJ(E)}}{3\intg{\bracket{\phi}(E)}} \eec
     \end{equation*}
+    and if $d\to0$ we expect a similar value for $D_g^2$.
     
-    and if $d\to0$ we expect a similar value for $D_g^+$.
-    
-\section{One Group Problem}
-    If we assume the diffusion problem is one group, we can solve it analytically and get some understanding of what is going on. In this case we can write the diffusion equation from \cref{eq:Diff,eq:Diff:BC} as:
-    
-    \begin{gather}
-    \label{eq:Diff:1G}
-        \forall x>0, \quad-\nabla D(\vr)\nabla\phi(\vr) + \Sigma_{t}\phi(\vr) = \Sigma_{s0}\phi(\vr) \\
-        \label{eq:Diff:1G:BC}
-        \phi(0) - 3D(0)\nabla\phi(0) = J^+(0) = \int_0^\infty{\int_{\Omega\cdot\hat{x}>0}\Omega\psi_b(\Omega,E)d\Omega}dE
-    \end{gather}
-    This equation can actually be solved analytically. For each region $x<d,x>d$ we have a solution of the form:
-    \begin{equation*}
-        \phi(x) = A_\pm e^{-\frac{x}{L_\pm}}+B_\pm e^{\frac{x}{L_\pm}}
-    \end{equation*}
-    where: 
-    \begin{equation}
-    \label{eq:def:L}
-    L_\pm = \sqrt{\frac{D^\pm}{\Sigma_a}}
-    \end{equation}
-    For $x>d$ we can say $B_+=0$ because the solution must fade away from the boundary source. $A\pm, B_-$ have to be determined from flux continuity, neutron balance preservation at the boundary and the boundary condition on the left boundary. From continuity at $x=d$:
-    
-    \begin{equation}
-    \label{eq:Diff:1G:Continuity}
-        A_- \exp\left(-\frac{d}{L_-}\right) + B_-\exp\left(\frac{d}{L_-}\right) = A_+\exp\left(-\frac{d}{L_+}\right)
-    \end{equation}
-    Also, from neutron preservation:
-    
-    \begin{equation}
-    \label{eq:Diff:1G:BoundaryBalance}
-        \frac{D^-}{L_-}\left[B_-\exp\left(\frac{d}{L_-}\right) - A_- \exp\left(-\frac{d}{L_-}\right)\right] = -\frac{D^+}{L_+}A_+ \exp\left(-\frac{d}{L_+}\right)
-    \end{equation}
-    From the left boundary condition:
-    
-    \begin{equation}
-    \label{eq:Diff:1G:BCSol}
-        A_- + B_- -3\frac{D^-}{L_-}(B_--A_-) = J^+(0)
-    \end{equation}
-    
-    \cref{eq:Diff:1G:BoundaryBalance,eq:Diff:1G:Continuity,eq:Diff:1G:BCSol} allow us to solve $\phi(x)$ for any given set of $D^\pm$.
-    
-    We can now try to find diffusion coefficients that preserve the \fst spatial moment in each region. These moments in the diffusion problem can be written as:
-    
+    Our physical quantity of interest would be denoted $\Phi_{g^i}$. The transport value for this quantity would be defined as:
     \begin{align}
-    \Phi_0^- & = \int_0^d\phi(x)dx \\
-    \Phi_0^+ & = \int_d^\infty\phi(x)dx \\
-    \Phi_1^- & = \int_0^d xJ(x)dx \\
-    \Phi_1^+ & = \int_d^\infty xJ(x)dx
+        \label{eq:Phi1:Transport}
+        \Phi_{g,t}^1 &= \int_{0}^{d}\intg{x\cdot \vec{J}(x,E)}dx \eec \\\nonumber
+        \Phi_{g,t}^2 &= \int_{d}^{\infty}\intg{x\cdot \vec{J}(x,E)}dx \eec
+    \end{align}
+    where $\vec{J}(x,E)$ is the neutron current for the solution of \cref{eq:BTE,eq:BTE:BC}.
+    The diffusion value for this quantity would be defined as:
+    \begin{align}
+        \label{eq:Phi1:Diffusion}
+        \Phi_{g,d}^1 &= -\int_{0}^{d}x\cdot D_g^1\nabla\phi_g(x)dx \eec \\\nonumber
+        \Phi_{g,d}^2 &= -\int_{d}^{\infty}x\cdot D_g^2\nabla\phi_g(x)dx \eec
+    \end{align}
+    where $\phi_g(x)$ is the solution to \cref{eq:Diff,eq:Diff:BC,eq:Diff:IC}.
+    
+\section{Semi-Analytic solution}
+    Suppose the diffusion coefficients were given. We will now find an analytical expression for $\Phi_{g,d}^{i}$ for $i\in\{1,2\}$.
+    Notice that for each of the two regions we can write using \cref{eq:Diff}:
+    \begin{equation}
+        \label{eq:Diff:diffeqsim}
+        \frac{d^2\phi_g}{dx^2}(x) = D_g^{-1}\left[\Sigma_{t,g}\phi_g(x) - \sum_{g'=1}^G\Sigma_{s0}^{g'\to g}\phi_{g'}(x)\right]\eec
+    \end{equation}
+    which can be rewritten in matrix form as:
+    \begin{equation}
+    \label{eq:Diff:diffeqmat}
+    \frac{d^2\vec{\phi}}{dx^2}(x) = D^{-1}\left[\Sigma_{t} - \Sigma_{s0}\right]\vec{\phi}(x)\eep
+    \end{equation}
+    where $D,\Sigma_t$ are diagonal matrices, and $\Sigma_{s0}$ is a full matrix. 
+    These matrices are constant within each region.
+    We introduce a simpler notation:
+    \begin{equation}
+    \label{def:U}
+        U^i = \sqrt{(D^i)^{-1}\left(\Sigma_t^i - \Sigma_{s0}^i\right)}\eep
+    \end{equation}
+    
+    \cref{eq:Diff:diffeqmat} is solvable. It has two linearly independent solutions\footnote{If $U^i$ is the unique root of $(D^i)^{-1}\left(\Sigma_t^i - \Sigma_{s0}^i\right)$. In these notes this is simply assumed.}, which can be written as:
+    \begin{equation}
+    \vec{\phi^i} = e^{-xU^i}\vec{A_i} + e^{xU^i}\vec{B_i} \eec
+    \end{equation}
+    where $\vec{A_i},\vec{B_i}$ will be uniquely defined by the boundary conditions and interface conditions.
+    This is done by writing the four boundary conditions and interface conditions:
+    \begin{align}
+        \label{eq:BC:Left}
+            \vec{A_1}+\vec{B_1} - 3D^1U^1\left(\vec{B_1}-\vec{A_1}\right) &= \intg{\int_{\Omega\cdot\hat{x}>0}\Omega\psi_b(\Omega,E)d\Omega} \eec \\
+        \label{eq:BC:Right}
+            \vec{B_2} &= 0 \eec \\
+        \label{eq:IC:Flux}
+            e^{-dU^1}\vec{A_1} + e^{dU^1}\vec{B_1} &= e^{-dU^2}\vec{A_2} + e^{dU^2}\vec{B_2} \eec \\
+        \label{eq:IC:Current}
+            D^1U^1\left(e^{dU^1}\vec{B_1} - e^{-dU^1}\vec{A_1}\right) &= D^2U^2\left(e^{dU^2}\vec{B_2} - e^{-dU^2}\vec{A_2}\right) \eep
     \end{align}
     
-    And we can look for $D_\pm$ such that the ratios $\frac{\Phi_1^\pm}{3\Phi_0^\pm}$ are preserved from their known transport values. The transport values are assumed known because they can be solved with Monte-Carlo, for example.
-    
-    We start with Fick's law in each region:
-    
+    With $\vec{A_i},\vec{B_i}$ uniquely defined by the solution these linear equations, we can obtain $\Phi_{g,d}^i$. For example, in the first region\footnote{This should be a 3D integral, probably, and the surface areas would cancel out. Todo in next version}:
     \begin{align}
-    \label{eq:Fick:x<d}
-        \forall\  0<x<d,&\quad J(x) = -D^-\frac{d\phi}{dx}(x) \\
-    \label{eq:Fick:x>d}
-        \forall x>d,&\quad J(x) = -D^+\frac{d\phi}{dx}(x)
+    \label{eq:Res:1}
+        \vec{\Phi}_{d}^1 &= -\int_{0}^{d}x\cdot D^1\nabla \phi(x)dx \\\nonumber
+        &= -D^1\int_{0}^{d}\left[\nabla\cdot (x\vec{\phi}) - 3\vec{\phi}\right]dx \\\nonumber
+        &= 3D^1\int_{0}^{d}\vec{\phi}dx - D^1d\vec{\phi}(d) \eep
     \end{align}
-    If we multiply by $x$ and integrate in each region:
     
+    This can be immediately solved for. $\int_0^d\phi(x)dx$ is known from the transport solution of \cref{eq:BTE,eq:BTE:BC}, and the other term is the evaluated term:
+    \begin{equation}
+    \label{eq:interface:intro}
+        \vec{\phi}(d) = e^{-dU^2}\vec{A_2}\eep
+    \end{equation}
+    
+    For the second region we similarly get:
     \begin{align}
-    \label{eq:Moment1:x<d}
-        \Phi_1^- & = -\int_0^d xD^-\frac{d\phi}{dx}(x) = -D^-\left[d\phi(d^-) - \Phi_0^-\right] \\
-    \label{eq:Moment1:x>d}
-        \Phi_1^+ & = -\int_d^\infty xD^-\frac{d\phi}{dx}(x) = -D^+\left[-d\phi(d^+) - \Phi_0^+ \right]
+     \label{eq:Res:2}
+         \vec{\Phi}_{d}^2 &= -\int_{d}^{\infty}x\cdot D^2\nabla \phi(x)dx \\\nonumber
+         &= -D^2\int_{d}^{\infty}\left[\nabla\cdot (x\vec{\phi}) - 3\vec{\phi}\right]dx \\\nonumber
+         &= 3D^2\int_{d}^{\infty}\vec{\phi}dx + D^2d\vec{\phi}(d) \eep
     \end{align}
-    We can now input the solution at $x=d$, and because of the continuity criterion, we can input the simpler version from the region $x>d$:
     
-    \begin{align}
-    \label{eq:Moment1:x<d:sim}
-    \Phi_1^- & = -D^-\left[dA_+\exp\left(-\frac{d}{L_+}\right) - \Phi_0^-\right] \\
-    \label{eq:Moment1:x>d:sim}
-    \Phi_1^+ & = -D^+\left[-dA_+\exp\left(-\frac{d}{L_+}\right) - \Phi_0^+ \right]
-    \end{align}
-    It is easy to see that indeed we get the known CMM values if $d\to0$ or if $d\to\infty$.
-    
-    The only complication comes from solving for $A_+$, which would depend on the choice of $D^\pm$, and as such this is a nonlinear set of 2 equations. However, it can probably be done fairly quickly with modern numerical methods. I should maybe write a short python code for this.
-    
-\section{\MG Problem}
-    In this case, the diffusion equation uses matrix operators rather than scalars:
-    
-    \begin{gather}
-    \label{eq:Diff:MG}
-    \forall x>0, \quad-\nabla D(\vr)\nabla\vec{\phi}(\vr) + \Sigma_{t}\vec{\phi}(\vr) = \Sigma_{s0}\vec{\phi}(\vr) \\
-    \label{eq:Diff:MG:BC}
-    \vec{\phi}(0) - 3D(0)\nabla\vec{\phi}(0) = \vec{J}^+(0) = \left(\intg{\int_{\Omega\cdot\hat{x}>0}\Omega\psi_b(\Omega,E)}\right)_{g=1}^{G}
-    \end{gather}
-    
-    Therefore, for each region we can write:
+    We can now iteratively search for the diffusion coefficient matrices $D^1,D^2$ for which: 
+    \begin{align*}
+    \vec{\Phi}_d^1 &= \intg{\int_0^d x\cdot J(x,E)dx} \eec \\
+    \vec{\Phi}_d^2 &= \intg{\int_d^\infty x\cdot J(x,E)dx} \eec
+    \end{align*}
+    where again $J(x,E)$ is given from the solution to \cref{eq:BTE,eq:BTE:BC}.
+    It isn't obvious that such diagonal matrices exist. It is also not obvious that any specific non-linear solver would converge to the correct solution even if it exists. What is clear, however, is that given both $d\to\infty$ or $d\to 0$, the result agrees with the known CMM result for which:
     
     \begin{equation}
-    \label{eq:Diff:MG:Mat}
-        D^\pm \frac{d^2\vec{\phi}}{dx^2}(x) = (\Sigma_t-\Sigma_{s0})\vec{\phi}(x)
+    D_g = \frac{\Phi_{g,t}}{3\int\intg{\phi(\vr)}dV}\eep
     \end{equation}
-    We can solve this too, if the matrix $(D^\pm)^{-1}(\Sigma_t-\Sigma_{s0})$ has a square root. Assume for now there is some matrix $U^\pm$ such that:
-    \begin{equation}
-    \label{eq:def:L:MG}
-        (U^\pm)^2=(D^\pm)^{-1}(\Sigma_t-\Sigma_{s0})
-    \end{equation}
-    We can solve \cref{eq:Diff:MG:Mat} with matrix exponentials:
-    \begin{equation}
-    \label{eq:Diff:MG:Sol}
-        \phi(x) = \exp(-xU^\pm)\vec{A}_\pm + \exp(xU^\pm)\vec{B}_\pm 
-    \end{equation}
-    where again $\vec{B}_+=\vec{0}$ so that the solution dies out at $x\to\infty$. If we now replace every appearance of $\frac{1}{L_\pm}$ with $U^\pm$ in the previous section, we get a similar set of equations to solve for $D^\pm$, which is now a set of $2G$ nonlinear equations.
     
-    All that remains to do is to code this up, and to find a way to find the square root of that matrix, if it actually exists. We only have one such unique matrix iff the matrix is positive semidefinite. A matrix $A$ is positive semidefinite iff:
+    Another important conclusion is that preservation of $\vec{\Phi}$ will result in a higher diffusion coefficient in $0\leq x\leq d$, and a lower diffusion coefficient in $x>d$, as is obvious from \cref{eq:Res:1,eq:Res:2}.
     
-    \begin{equation}
-    \label{eq:positiveSemidefinite}
-        \forall x,\quad x^\star Ax\geq 0
-    \end{equation}
-    In our case we need to show that:
-    
-    \begin{equation}
-    \forall x\in\mathbb{C}^G,\quad x^\star D^{-1}(\Sigma_t-\Sigma_{s0})x\geq 0
-    \end{equation}
-    It would be enough to show that each of $D,(\Sigma_t-\Sigma_{s0})$ are positive semidefinite if they commute. D is diagonal, so that's unlikely. Gershgorin's Circle theorem could help, because I think it's going to be a diagonally dominant matrix, because $D$ is positive and diagonal and the other one should meet Gershgorin criteria.
 \end{document}
