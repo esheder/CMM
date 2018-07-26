@@ -8,6 +8,9 @@
 \pagestyle{plain}
 \usepackage{setspace}
 \onehalfspacing
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{listings}
 
 \input{../setup.tex}
 
@@ -195,5 +198,56 @@
     \end{equation}
     
     Another important conclusion is that preservation of $\vec{\Phi}$ will result in a higher diffusion coefficient in $0\leq x\leq d$, and a lower diffusion coefficient in $x>d$, as is obvious from \cref{eq:Res:1,eq:Res:2}.
+    
+\section{Algorithm}
+    The preceding section describes a way to define diffusion based migration moments once the diffusion coefficients are known.
+    Thus, we can perform a residual minimization algorithm to try and find a set of diagonal diffusion coefficient matrices that would minimize the residual (meaning they would preserve the required moment).
+    The algorithm goes as follows:
+    \begin{algorithm}\caption{General algorithm}\label{alg:gen}
+    \begin{algorithmic}[1]
+        \Require $\Sigma_{t}^1,\Sigma_{t}^2,\Sigma_{s0}^1,\Sigma_{s0}^2,D^0,J^+_{bc},\epsilon, \Phi_{t}^1,\Phi_{t}^2, \phi^1,\phi^2$
+        \State $D^1,D^2 \gets D^0$
+        \State $r \gets \text{ones}(G,2)$
+        \While{any($r>\epsilon$)}
+            \State $U^1 \gets \sqrt{\left(D^1\right)^{-1}\left(\Sigma_{t}^1-\Sigma_{s0}^1\right)}$
+            \State $U^2 \gets \sqrt{\left(D^2\right)^{-1}\left(\Sigma_{t}^2-\Sigma_{s0}^2\right)}$
+            \State Solve \cref{eq:BC:Left,eq:BC:Right,eq:IC:Flux,eq:IC:Current} for $A_2$
+            \State $\Phi_{d}^1 \gets 3D^1\phi^1 - D^1d\exp(-dU^2)A_2$
+            \State $\Phi_{d}^2 \gets 3D^2\phi^2 + D^2d\exp(-dU^2)A_2$
+            \State $r(:,1) \gets \Phi_{d}^1 - \Phi_{t}^1$
+            \State $r(:,2) \gets \Phi_{d}^2 - \Phi_{t}^2$
+            \State Make new guess for $D^1,D^2$
+        \EndWhile
+    \end{algorithmic}
+    \end{algorithm}
+    
+    One could immediately see that if we define statements 4 through 10 as a function that returns $r$ as based on the value of $D^2,D^2$, with the rest of the data used as constant parameters. The algorithm as a whole then becomes a root search problem for a non-linear function. This can be summarized as:
+    
+    \begin{algorithm}[H]\caption{Algorithm as a root search}\label{alg:root}
+    \begin{algorithmic}[1]
+        \Require $\Sigma_{t}^1,\Sigma_{t}^2,\Sigma_{s0}^1,\Sigma_{s0}^2,D^0,J^+_{bc},\epsilon, \Phi_{t}^1,\Phi_{t}^2, \phi^1,\phi^2$
+        \Function{DiffResidual}{$D$}
+        \State $D^1 \gets D(:,1)$
+        \State $D^2 \gets D(:,2)$
+        \State $U^1 \gets \sqrt{\left(D^1\right)^{-1}\left(\Sigma_{t}^1-\Sigma_{s0}^1\right)}$
+        \State $U^2 \gets \sqrt{\left(D^2\right)^{-1}\left(\Sigma_{t}^2-\Sigma_{s0}^2\right)}$
+        \State Solve \cref{eq:BC:Left,eq:BC:Right,eq:IC:Flux,eq:IC:Current} for $A_2$
+        \State $\Phi_{d}^1 \gets 3D^1\phi^1 - D^1d\exp(-dU^2)A_2$
+        \State $\Phi_{d}^2 \gets 3D^2\phi^2 + D^2d\exp(-dU^2)A_2$
+        \State $r(:,1) \gets \Phi_{d}^1 - \Phi_{t}^1$
+        \State $r(:,2) \gets \Phi_{d}^2 - \Phi_{t}^2$
+        \State \Return r
+        \EndFunction
+        
+        \State \Call {FindRoot}{DiffResidual, $x_0=D^0$, convergence$=\epsilon$}
+    \end{algorithmic}
+    \end{algorithm}
+    
+\appendix
+\section{Appendix: Python Implementation}
+    This algorithm is of course fairly easy to implement as well. A Python implementation is attached below. Currently this is a draft so the code isn't included to save the reader the time.
+    
+    \lstinputlisting[language=Python, breaklines=true]{../../src/util.py}
+    \lstinputlisting[language=Python, breaklines=true]{../../src/boundary.py}
     
 \end{document}

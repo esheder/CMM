@@ -8,5 +8,6 @@
 *.toc
 *.nav
 *.snm
+*.out
 *~
 __pycache__
