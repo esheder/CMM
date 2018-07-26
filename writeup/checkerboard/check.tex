@@ -1,0 +1,83 @@
+
+\documentclass[a4paper,letterpaper,12pt,oneside,draft]{article}
+
+\usepackage{geometry}
+\geometry{margin=2cm,hoffset=0in, %
+    headheight=0.5\baselineskip}
+\usepackage{times}
+\pagestyle{plain}
+\usepackage{setspace}
+\onehalfspacing
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{listings}
+\usepackage{graphicx}
+
+\input{../setup.tex}
+
+\newcommand{\eec}{\;,}
+\newcommand{\eep}{\;.}
+\newcommand{\zth}{0th }
+\newcommand{\fst}{1st }
+\newcommand{\snd}{2nd }
+\newcommand{\OpL}{\mathscr{L}}
+\newcommand{\OpT}{\mathscr{T}}
+\newcommand{\MG}{MG }
+
+\newcommand{\allspace}{\ensuremath{\mathbb{R}^3}}
+\newcommand{\norm}[1]{\left| #1 \right|}
+\newcommand{\bracket}[1]{\ensuremath{\left\langle #1 \right\rangle}}
+\newcommand{\bracketv}[1]{\bracket{#1}_V}
+\newcommand{\bracketvo}[1]{\ensuremath{\bracket{#1}_{V,\Omega}}}
+\newcommand{\bracketR}[1]{\ensuremath{\bracket{#1}_{\allspace}}}
+\newcommand{\bracketex}[2][V]{\ensuremath{\bracket{#2}_{#1}}}
+\newcommand{\bracketsa}[1]{\bracketex[\allspace,\Omega]{#1}}
+\newcommand{\rdotJ}[1][\allspace]{\bracketex[#1]{\vec{r}\cdot\vec{J}}}
+\newcommand{\rsqp}{\bracketR{r^2\phi}}
+\newcommand{\intg}[2][g]{\ensuremath{\int_{E_{#1}}^{E_{#1-1}} #2 dE}}
+\newcommand{\intcg}[2][g]{\ensuremath{\int_{E_{#1}}^{\infty} #2 dE}}
+\newcommand{\vr}{\ensuremath{\vec{r}}}
+\newcommand{\dvr}{\left(\vr-\vr_0\right)}
+\newcommand{\psif}[1][]{\psi(\vr,\Omega#1,E#1)}
+\newcommand{\dvrdotJ}{\bracketR{\dvr\cdot\vec{J}}}
+\newcommand{\dvrdotJg}{\bracketR{\dvr\cdot\vec{J_g}}}
+\newcommand{\dvrsqp}{\bracketR{\dvr^2\phi}}
+\newcommand{\dvrsqpg}{\bracketR{\dvr^2\phi_g}}
+\newcommand{\regint}[1]{\ensuremath{\int_{V_0} #1 dV_0}}
+
+\counterwithin{equation}{section}
+
+\title{Defining two region diffusion coefficients for the boundary source problem: Exploratory notes}
+\author{Eshed Magali \\ Edward W. Larsen}
+\date{\today}
+
+
+\widowpenalty10000
+\clubpenalty10000
+
+\begin{document}
+\maketitle
+
+\section{Premise}
+    Let there be a full 3D space, filled with a repeating lattice of infinitely long assemblies who are translation symmetric in $z$. 
+    This repeating lattice is based on two different assemblies which are laid out in a checkerboard pattern, where each lattice only neighbors the other and never another assembly like itself. 
+    For illustration, see \cref{fig:checkerboard}.
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.7\textwidth]{checkerboard_pattern.pdf}
+        \caption{An illustration of the checkerboard pattern.}\label{fig:checkerboard}
+    \end{figure}
+
+    We assume in these notes that each lattice is reflection symmetric by itself, such that the entire 2-by-2 unit cell that defines the lattice is symmetric to $90^\circ$ rotations.
+    
+\section{The diffusion problem}
+    In this section I assume that all the parameters for the diffusion problem are already known, and state what the solution is and how the first moment of migration can be obtained from this problem.
+    
+\section{Defining parameters}
+    In this section I show the equations that define all of the parameters. These would be preservation of each reaction rate, preservation of inter-assembly leakage, and preservation of the first moment of migration.
+    
+    Because the first moment of migration and the flux and current themselves are non-linear functions of the diffusion coefficient, this would become a non-linear search for the diffusion coefficients and cross sections (the cross sections would be well defined).    
+
+
+\end{document}
