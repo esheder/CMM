@@ -39,6 +39,7 @@
 \newcommand{\vr}{\ensuremath{\vec{r}}}
 \newcommand{\dvr}{\left(\vr-\vr_0\right)}
 \newcommand{\psif}[1][]{\psi(\vr,\Omega#1,E#1)}
+\newcommand{\psifz}[1][]{\psi(\vr,\Omega#1,E#1;\vr_0)}
 \newcommand{\dvrdotJ}{\bracketR{\dvr\cdot\vec{J}}}
 \newcommand{\dvrdotJg}{\bracketR{\dvr\cdot\vec{J_g}}}
 \newcommand{\dvrsqp}{\bracketR{\dvr^2\phi}}
@@ -58,26 +59,206 @@
 \begin{document}
 \maketitle
 
-\section{Premise}
-    Let there be a full 3D space, filled with a repeating lattice of infinitely long assemblies who are translation symmetric in $z$. 
-    This repeating lattice is based on two different assemblies which are laid out in a checkerboard pattern, where each lattice only neighbors the other and never another assembly like itself. 
-    For illustration, see \cref{fig:checkerboard}.
-
+\section{Premise}\label{sec:premise}
+    Let there be a full, infinite 3D space, filled with a periodically repeating lattice of infinitely long (in the $z$ direction) assemblies who are translation symmetric in $z$. 
+    This repeating lattice is based on two different assemblies which are laid out in a checkerboard pattern, where each assembly only neighbors the other and never another assembly like itself. 
+    For illustration, see \cref{fig:checkerboard:transport}.
     \begin{figure}[H]
         \centering
         \includegraphics[width=0.7\textwidth]{checkerboard_pattern.pdf}
-        \caption{An illustration of the checkerboard pattern.}\label{fig:checkerboard}
+        \caption{An illustration of the checkerboard pattern.}\label{fig:checkerboard:transport}
     \end{figure}
 
     We assume in these notes that each lattice is reflection symmetric by itself, such that the entire 2-by-2 unit cell that defines the lattice is symmetric to $90^\circ$ rotations.
+    To make notations easier, we name the two assembly types $A_1$ and $A_2$ and the volume each occupies as $V_1$ and $V_2$, correspondingly. If we want to discuss all of the space that is occupied by assemblies of type $A_i$, we mark that infinite volume as $V_i^\infty$.
     
-\section{The diffusion problem}
+    With this geometry known, we describe the Boltzmann Transport Equation (BTE), in its eigenvalue form:
+    \begin{align}
+    \label{eq:BTE}
+        \Omega\cdot\nabla\psif + \Sigma_{t}(\vr,E)\psif &= \iint_{4\pi}\int_{0}^{\infty}\Sigma_{s}(\vr,\Omega',E'\to \Omega,E)\psif[']dE'd\Omega' \\\nonumber
+        &+ \frac{\chi(\vr,E)} {4\pi k} \int_{0}^{\infty} \nu\Sigma_{f}(\vr,E') \iint_{4\pi}\psif[']d\Omega'dE' \eec
+    \end{align}
+    with periodic boundary conditions around a 2X2 section. Due to the symmetry in this setup, this is equivalent to reflective boundary conditions.
+    We assume that the solution to the BTE, $\psif$ is known to us, as well as the solution $\psifz$ to a whole set of point source problems:
+    \begin{align}
+    \label{eq:BTE:PS}
+        \Omega\cdot\nabla\psifz + \Sigma_{t}(\vr,E)&\psifz \\\nonumber
+        &=\iint_{4\pi}\int_{0}^{\infty}\Sigma_{s}(\vr,\Omega',E'\to \Omega,E)\psifz[']dE'd\Omega' \\\nonumber
+        &+ \frac{\chi(\vr,E)} {4\pi k} \delta\dvr \eep
+    \end{align}
+    
+\section{The diffusion problem}\label{sec:diffusion}
     In this section I assume that all the parameters for the diffusion problem are already known, and state what the solution is and how the first moment of migration can be obtained from this problem.
     
-\section{Defining parameters}
-    In this section I show the equations that define all of the parameters. These would be preservation of each reaction rate, preservation of inter-assembly leakage, and preservation of the first moment of migration.
-    
-    Because the first moment of migration and the flux and current themselves are non-linear functions of the diffusion coefficient, this would become a non-linear search for the diffusion coefficients and cross sections (the cross sections would be well defined).    
+    We start by describing the geometry of the diffusion problem. Each of the original two regions is replaced with a homogeneous medium, such that we now have a periodically repeating lattice in a checkerboard pattern of homogeneous regions, as seen in \cref{fig:checkerboard:diffusion}.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.7\textwidth]{checkerboard_pattern_diff.pdf}
+        \caption{An illustration of the checkerboard pattern.}\label{fig:checkerboard:diffusion}
+    \end{figure}
+    The volumes and assemblies keep their notation from \cref{sec:premise}, as there should be no reason to be confused by whether or not a volume in question is homogenized.
 
+    The diffusion problem is a multi-region, multigroup diffusion problem. The diffusion problem can be stated as:
+    
+    \begin{equation}
+    \label{eq:DE}
+        -\nabla \frac{D_g(\vr)}{\epsilon_g(\vr)}\nabla\epsilon_g(\vr)\phi_g(\vr) +
+        \Sigma_{t,g}(\vr)\phi_g(\vr) = 
+        \sum_{g'=1}^G \Sigma_{s0}^{g'\to g}(\vr)\phi_{g'}(\vr) + \frac{\chi_g(\vr)}{k}\sum_{g'=1}^{G}\nu\Sigma_{f,g'}(\vr)\phi_{g'}(\vr)\eec
+    \end{equation}
+    where $\epsilon_g,D_g,\Sigma_{t,g},\Sigma_{s0}^{g'\to g},\chi_g,\nu\Sigma_{f,g}$ are all parameters that are histograms in space.
+    They have one specific value within each homogenized assembly, and they are possibly discontinuous across the assembly boundaries. We mark their values as, for example:
+    \begin{equation}
+    \label{eq:TotalHomogenized}
+        \Sigma_{t,g}(\vr) = 
+        \begin{cases}
+            \Sigma_{t,g}^1 & \vr \in V_1^\infty \\
+            \Sigma_{t,g}^2 & \vr \in V_2^\infty
+        \end{cases}\eep
+    \end{equation}
+    The boundary conditions are periodic boundary conditions around a 2X2 assembly, which are of course equivalent to reflective boundary conditions due to the symmetry of the problem.
+    
+    The equation form in \cref{eq:DE} allows for flux discontinuities across assembly surfaces, as the continuous quantities are actually assumed to be $\epsilon_g\phi_g$ and $D_g\nabla\phi_g$.
+    
+    If all of these parameters are known, \cref{eq:DE} has a unique solution, up to a multiplication by a constant scalar, which can be determined by some normalization, the same as with \cref{eq:BTE}.
+    We mark this solution as $\vec{\phi}$ (the vector here represents a multigroup vector), and where it could be confused with the BTE's scalar flux we use the notation $\phi^d$ instead.
+    
+    Using this scalar flux we can calculate two production reaction rate functions, $F_h(\vr),F_{dh}(\vr)$, which stand for the homogenized and dehomogenized production reaction rate functions, respectively. These are defined as:
+    \begin{align}
+    \label{def:Fh}
+        F_h(\vr) &\equiv \sum_{g'=1}^G\nu\Sigma_{f,g'}(\vr)\phi_{g'}(\vr) \eec\\
+    \label{def:Fdh}
+        F_{dh}(\vr) &\equiv \sum_{g'=1}^G\nu\Sigma_{f,g'}(\vr)\phi_{g'}(\vr)\intg[g']{\iint_{4\pi}\psi(\vr,\Omega,E)d\Omega}\eep
+    \end{align}
+    
+    We now define the diffusion point source problems as:
+    \begin{equation}
+    \label{eq:DE:PS}
+        -\nabla \frac{D_g(\vr)}{\epsilon_g(\vr)}\nabla\epsilon_g(\vr)\phi_g(\vr;\vr_0) +
+        \Sigma_{t,g}(\vr)\phi_g(\vr;\vr_0) = 
+        \sum_{g'=1}^G \Sigma_{s0}^{g'\to g}(\vr)\phi_{g'}(\vr;\vr_0) + \frac{\chi_g(\vr)}{k}\delta\dvr\eec
+    \end{equation}
+    with zero flux boundary conditions at $\dvr^2\to\infty$.
+    By either solving these problems directly, or by other means to be described later, we then define the following multigroup quantities:
+    \begin{align}
+    \label{def:PhiH}
+        \Phi_{h,g}^i &\equiv -\iiint_{V_i^\infty}\iiint_{\allspace}F_h(\vr_0)\dvr\cdot D_g(\vr)\nabla\phi(\vr;\vr_0)dV_0dV \eec\\
+    \label{def:PhiDH}
+        \Phi_{h,g}^i &\equiv -\iiint_{V_i^\infty}\iiint_{\allspace}F_{dh}(\vr_0)\dvr\cdot D_g(\vr)\nabla\phi(\vr;\vr_0)dV_0dV\eep
+    \end{align}
+    These quantities shall be named the homogenized and dehomogenized diffusion first moment, respectively.
+    
+    \subsection{Methods to obtain the diffusion first moments}
+    \subsubsection{Direct point sources}
+    By either solving many point sources for an estimate, or by diffusion Monte-Carlo.
+    TODO: Expand on this idea.
+    \subsubsection{Solving a large many-assembly problem}
+    This would involve writing $\phi(\vr;\vr_0)$ as $\mathcal{D}^{-1}\vec{\chi}(\vr)\dvr$, the inverse diffusion solution operator, as was done for transport.
+    TODO: Expand on this idea.
+    \subsubsection{Using adjoint problems}
+    This would involve guessing an ansatz for $\phi^\star$ that is driven by a $\dvr \cdot D(\vr)\nabla$ source, which doesn't make sense.
+    TODO: Expand on this idea. Make it make sense.
+    
+    
+\section{Defining parameters}\label{sec:param}
+    In this section I show the equations that define all of the parameters. 
+    These would be preservation of each reaction rate, preservation of inter-assembly leakage, and preservation of the first moment of migration.
+    
+    Because the first moment of migration and the flux and current themselves are non-linear functions of the diffusion coefficient, this would become a non-linear search for the diffusion coefficients and cross sections (the cross sections would be well defined).
+    
+    We start by defining our requirement for preservation of reaction rates. To make life simpler to understand, we denote any solution to a diffusion problem with a superscript $d$. For example, the diffusion scalar flux would be $\phi^d$.
+    We require:
+    \begin{align}
+    \label{eq:ReacRate}
+        \Sigma_{t,g}^i\int_{V_i} \phi_g^d(\vr)dV &= \int_{V_i}\intg{\Sigma_{t}(\vr,E)\iint_{4\pi}\psif d\Omega}dV \eec\\\nonumber
+        \Sigma_{s0}^{i,g'\to g}\int_{V_i} \phi_{g'}^d(\vr)dV &= \int_{V_i}\int_{E_g}\int_{E_{g'}}\iint_{4\pi}\iint_{4\pi} \Sigma_{s}(\vr,\Omega',E'\to\Omega,E) \psif['] d\Omega'd\Omega dE'dEdV \eec\\\nonumber
+        \nu\Sigma_{f,g}^i\int_{V_i} \phi_g^d(\vr)dV &= \int_{V_i}\intg{\nu\Sigma_{f}(\vr,E)\iint_{4\pi}\psif d\Omega}dV \eec\\\nonumber
+        \chi_g^i\sum_{g'=1}^G\nu\Sigma_{f,g'}^i\int_{V_i} \phi_{g'}^d(\vr)&dV = \int_{V_i}\intg{\chi(\vr,E)\int_0^\infty\nu\Sigma_{f}(\vr,E')\iint_{4\pi}\psif['] d\Omega'dE'}dV\eep
+    \end{align}
+    This seems to demand that we know the diffusion flux in advance, but using Generalized Equivalence Theory~\cite{SmithHomogenization} (G.E.T), this can also be done through transport values only.
+    The group integrated balance equation for the transport and diffusion problems are:
+    \begin{align}
+    \label{eq:BTE:Balance}
+        &\iint_{\partial V_i}\iint_{4\pi}\intg{\Omega\psif} d\Omega\cdot\vec{dA} \\\nonumber
+        +& \iiint_{V_i}\intg{\Sigma_{t}(\vr,E)\iint_{4\pi}\psif d\Omega}dV \\\nonumber
+        =& \int_{V_i}\int_{E_g}\int_{0}^\infty\iint_{4\pi}\iint_{4\pi} \Sigma_{s}(\vr,\Omega',E'\to\Omega,E) \psif['] d\Omega'd\Omega dE'dEdV \\\nonumber
+        +& \int_{V_i}\intg{\frac{\chi(\vr,E)}{4\pi k} \int_0^\infty\nu\Sigma_{f}(\vr,E')\iint_{4\pi}\psif['] d\Omega'dE'}dV \eec\\
+    \label{eq:DE:Balance}
+        -&\iint_{\partial V_i}D_g^i\nabla\phi_g^d(\vr) \cdot\vec{dA} + \Sigma_{t,g}^i\iiint_{V_i}\phi_g^d(\vr)dV \\\nonumber
+        =& \sum_{g'=1}^G\Sigma_{s0}^{i,g'\to g}\int_{V_i}\phi_{g'}^d(\vr)dV
+        + \frac{\chi_g^i}{k}\sum_{g'=1}^G\nu\Sigma_{f,g'}\int_{V_i}\phi_{g'}^d(\vr)dV \eep
+    \end{align}
+    In G.E.T, the discontinuity factors (here $\epsilon_{g}^i$) are chosen such that:
+    \begin{equation}
+    \label{eq:GET}
+        \iint_{\partial V_i}\iint_{4\pi}\intg{\Omega\psif} d\Omega\cdot\vec{dA} = -\iint_{\partial V_i}D_g^i\nabla\phi_g^d(\vr) \cdot\vec{dA} \eec
+    \end{equation}
+    if the cross sections are chosen in the following way:
+    \begin{align}
+    \label{def:MGXS}
+        \Sigma_{t,g}^i &\equiv \frac{\iiint_{V_i}\intg{\Sigma_{t}(\vr,E)\iint_{4\pi}\psif d\Omega}dV}{\iint_{4\pi}\intg{\psif}d\Omega} \eec\\\nonumber
+        \Sigma_{s0}^{i,g'\to g} &\equiv \frac{\int_{V_i}\int_{E_g}\int_{E_{g'}}\iint_{4\pi}\iint_{4\pi} \Sigma_{s}(\vr,\Omega',E'\to\Omega,E) \psif['] d\Omega'd\Omega dE'dEdV}{\iint_{4\pi}\intg[g']{\psif}d\Omega} \eec\\\nonumber
+        \nu\Sigma_{f,g}^i &\equiv \frac{\int_{V_i}\intg{\nu\Sigma_{f}(\vr,E)\iint_{4\pi}\psif d\Omega}dV}{\iint_{4\pi}\intg{\psif}d\Omega}\eec \\\nonumber
+        \chi_g^i &\equiv \frac{\int_{V_i}\intg{\chi(\vr,E)\int_0^\infty\nu\Sigma_{f}(\vr,E')\iint_{4\pi}\psif['] d\Omega'dE'}dV}{\int_{V_i}\int_0^\infty\nu\Sigma_{f}(\vr,E')\iint_{4\pi}\psif['] d\Omega'dE'dV} \eec
+    \end{align}
+    for any given choice of diffusion coefficients $D_g^i$.
+    The method to obtain discontinuity factors in this manner is discussed later in this work, and can originally be found in papers about G.E.T~\cite{SmithHomogenization}.
+    Choosing multigroup cross sections as in \cref{def:MGXS}, and appropriate discontinuity factors for any given choice of $D_g^i$ would preserve the reaction rates as required by \cref{eq:ReacRate}.
+    
+    Let us then assume that a set of diffusion coefficients $D_g^i$ is given. 
+    How are the discontinuity factors determined?
+    For each assembly, introduce the following problem:
+    \begin{align}
+    \label{eq:DFCalc}
+        -\nabla D_g(\vr)\nabla\phi_g^d(\vr) +
+        \Sigma_{t,g}(\vr)\phi_g^d(\vr) = 
+        \sum_{g'=1}^G \Sigma_{s0}^{g'\to g}(\vr)\phi_{g'}^d(\vr) + \frac{\chi_g(\vr)}{k}\sum_{g'=1}^{G}\nu\Sigma_{f,g'}(\vr)\phi_{g'}^d(\vr)\eec
+    \end{align}
+    with boundary conditions such that: 
+    \begin{equation}
+    \label{eq:DFCalc:BC}
+        \forall \vr\in\partial V_i\quad -D_g\nabla\phi_g^d(\vr) = \iint_{4\pi} \intg{\Omega\psif}d\Omega \cdot \vec{dA}\eep
+    \end{equation}
+    From the solution to \cref{eq:DFCalc,eq:DFCalc:BC} we define the discontinuity factor $\epsilon_{g}^i$ as:
+    \begin{equation}
+    \label{def:DF}
+    \epsilon_g^i \equiv \frac{\iint_{\partial V_i}\iint_{4\pi}\intg{\psif} d\Omega dA}{\iint_{\partial V_i}\phi_g^d(\vr)dA}\eep
+    \end{equation}
+    According to both Koebke's Equivalence Theory~\cite{Koebke} and the G.E.T paper~\cite{SmithHomogenization}, this will simultaneously cause the preservation of the scalar flux, reaction rates, eigenvalue and overall surface currents when later used to solve the diffusion lattice problem, regardless of the choice of $D_g^i$.
+    Koebke chose to iteratively find diffusion coefficients such that the discontinuity factors would be identical on opposite surfaces (which isn't required in our highly symmetric problem), and Smith chose to use flux-weighted homogenized diffusion coefficients, like so:
+    \begin{equation}
+    \label{def:SmithDiffCoeff}
+        D_g^i \equiv \frac{\iiint_{V_i}\intg{D(\vr,E)\iint_{4\pi}\psif d\Omega}dV}{\iiint_{V_i}\intg{\iint_{4\pi}\psif d\Omega}dV} \eep
+    \end{equation}
+    $D(\vr,E)$, though not itself really a transport quantity, is given by:
+    \begin{equation}
+    \label{eq:SmithDiffCoeff:TranXS}
+        D(\vr,E) = \frac{1}{3\Sigma_{tr}(\vr,E)}\eec
+    \end{equation}
+    where $\Sigma_{tr}$ is given through either the out-scatter or in-scatter approximations, if available. Exact usage was not specified in the original paper by Smith~\cite{SmithHomogenization}.
+    
+    The choice by Smith has the advantage of not being iterative, but it does not seek to define the diffusion coefficients in a way that preserves any quantity of interest.
+    The main contribution of this work is, in fact, an introduction of a requirement that has to be met by the diffusion coefficients, in an effort to preserve some quantity of interest.
+    In this case, we seek to preserve the first migration moment.
+    Like in Koebke's work, this would require an iterative search for the correct diffusion coefficient set.
+    
+\section{Iterative definition of the diffusion coefficient}
+    The diffusion coefficient, as mentioned above, is the only parameter in the diffusion problem which we have yet to define.
+    We seek a definition that in tandem with the other definitions would simultaneously preserve the scalar flux, surface currents, reaction rates and the first migration moment.
+    Since all but the last are fully preserved for any choice of diffusion coefficient if we pick the discontinuity factors properly, we must contend with the last.
+    The process will go as follows:
+    First, pick a guess for the diffusion coefficient.
+    Then, using this diffusion coefficient, calculate the discontinuity factors that ensure preservation of the scalar flux etc.
+    With both of those in hand, solve \cref{eq:DE} to obtain $F_h$ or $F_{dh}$, as desired.
+    Now solve \cref{eq:DE:PS} or use other methods to obtain $\Phi_g^i$, as in \cref{def:PhiH} or \cref{def:PhiDH}.
+    Compare $\Phi_g^i$ to its transport value, and decide on convergence when this is conserved.
+    If not conserved, make a new guess for the diffusion coefficients.
+    
+    This should feel familiar, as it is basically a root search for a non-linear, expensive to calculate function.
+    Given a diffusion coefficient, there is a distinct result of $\Phi_g^i$ with the process above. If we define $G(\vec{D})$ as that function, and $\Phi_g^{i,t}$ is the transport value of the first migration moment, then we are looking for roots of $G(D)-\vec{\Phi^{i,t}}$. 
+    This is a non-linear function in $D$, and we're looking for its roots while hoping to minimize evaluations of $G(D)$.
+    This is a known problem, and there are algorithms designed for this purpose.
+    Additional knowledge about $G$ can make the process easier, so there is room for improvement, but the problem is now well posed and would provide a distinct diffusion coefficient set that has the required properties, if converged.\newline
+    Q.E.D
 
 \end{document}
