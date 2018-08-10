@@ -5,9 +5,11 @@
 
 import numpy as np
 from scipy.sparse.linalg import aslinearoperator
-from scipy.sparse.linalg import bicgstab as solve
+#from scipy.sparse.linalg import bicgstab as solve
+from scipy.sparse.linalg import gmres as solve
 from scipy.sparse import csr_matrix
 from scipy.linalg import expm
+from math import pi
 
 def PrintRes(f):
     def f_wrap(*args, **kwargs):
@@ -65,7 +67,7 @@ class BCCLS:
         sol[:n] = self.exUmm.dot(v1) + self.exUmp.dot(v2) - self.exUp.dot(v3)
         sol[n:2*n] = (self.Dm.dot(self.Um.dot(self.exUmp.dot(v2) - self.exUmm.dot(v1))) +
                       self.Dp.dot(self.Up.dot(self.exUp.dot(v3))))
-        sol[2*n:] = v1 + v2 - (3.0*self.Dm.dot(self.Um.dot(v2 - v1)))
+        sol[2*n:] = 0.25*(v1 + v2 - (2.0*self.Dm.dot(self.Um.dot(v2 - v1))))
         return sol
 
 @PrintRes
