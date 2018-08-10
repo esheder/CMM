@@ -166,6 +166,6 @@ if __name__ == '__main__':
     Jp = source_boundary(eb, st)
     #Jp = np.zeros_like(Jp)
     #Jp[0] = 1.0
-    d = 40.0
+    d = 20.0
     D = solve(regions, d, Jp)
     print(D)
