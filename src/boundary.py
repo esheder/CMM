@@ -114,7 +114,7 @@ def solve(reg, d, Jp):
     phi1m, phi1p = reg[0].rJ, reg[1].rJ
     n = phi0m.shape[0]
 
-    @PrintRes
+    #@PrintRes
     def residual(D):
         """Returns how close we are to convergence in each variable
 
@@ -168,4 +168,5 @@ if __name__ == '__main__':
     #Jp[0] = 1.0
     d = 20.0
     D = solve(regions, d, Jp)
+    print('Results were:')
     print(D)

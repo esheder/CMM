@@ -14,6 +14,7 @@ from math import pi
 def PrintRes(f):
     def f_wrap(*args, **kwargs):
         res = f(*args, **kwargs)
+        print('The results of %s were:' % f.__name__)
         print(res)
         return res
     return f_wrap
@@ -70,7 +71,7 @@ class BCCLS:
         sol[2*n:] = 0.25*(v1 + v2 - (2.0*self.Dm.dot(self.Um.dot(v2 - v1))))
         return sol
 
-@PrintRes
+#@PrintRes
 def linsolve(M,b):
     A = aslinearoperator(M)
     v, info = solve(A,b,x0=b,tol=1e-6)
