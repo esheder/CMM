@@ -32,13 +32,10 @@ class BCCLS:
 
     """
     def __init__(self, exUp, exUmp, exUmm, Up, Um, Dp, Dm, d,
-                 logfile='test.log', loglevel=logging.WARNING):
+                 loghandler=hndlr):
         self.log = logging.getLogger( '%s.%s' %(__name__, str(type(self))) )
-        hndlr = logging.FileHandler(logfile)
-        self.log.setLevel(loglevel)
-        frmtr = logging.Formatter(fmt='%(asctime)s - %(levelname)s - %(name)s: \n %(message)s')
-        hndlr.setFormatter(frmtr)
-        self.log.addHandler(hndlr)
+        self.log.setLevel(logging.WARNING)
+        self.log.addHandler(loghandler)
         
         self.exUp = exUp
         self.exUmp = exUmp
@@ -50,26 +47,14 @@ class BCCLS:
         self.d = d
         self.n = Dm.shape[0]
         self.shape = (3*self.n,3*self.n)
-        self.dtype = 'float64'
+        self.dtype = 'complex128' if 'complex128' in [Up.dtype, Um.dtype] else 'float64'
         self._test_()
 
     def _test_(self):
-        self.log.debug('Testing BCCLS construction')
-        self.log.debug('Up')
-        self.log.debug(self.Up.shape)
-        self.log.debug(self.Up)
-        self.log.debug('Um')
-        self.log.debug(self.Um.shape)
-        self.log.debug(self.Um)
-        self.log.debug('Dp')
-        self.log.debug(self.Dp.shape)
-        self.log.debug(self.Dp)
-        self.log.debug('Dm')
-        self.log.debug(self.Dm.shape)
-        self.log.debug(self.Dm)
-        self.log.debug('exUp')
-        self.log.debug(self.exUp.shape)
-        self.log.debug(self.exUp)
+        titles = ['Up', 'Um', 'Dp', 'Dm', 'exUp']
+        objs = (self.Up, self.Um, self.Dp, self.Dm, self.exUp)
+        frmt = '\n'.join(['%s:\n%s' for title in titles])
+        self.log.debug('Testing BCCLS construction:\n%s' % frmt, objs)
         
 
     def matvec(self, v):
@@ -134,9 +119,9 @@ def BCsolve(Up, Um, Dp, Dm, Jp, d):
     M = BCCLS(exUp, exUmp, exUmm, Up, Um, Dp, Dm, d)
     v = linsolve(M,b)
     logger.debug('Test linsolve:\n%s', M.matvec(v)-b)
-    Ap = v[2*n:]
+    Amm, Amp, Ap = v[:n], v[n:2*n], v[2*n:]
     logger.debug('Scalar flux on interface:\n%s', exUp.dot(Ap))
     logger.debug('Net current on interface:\n%s', -Dp.dot(-Up.dot(exUp.dot(Ap))))
     logger.debug('Partial right current on interface:\n%s',
                  partialRight(exUp.dot(Ap), -Dp.dot(-Up.dot(exUp.dot(Ap)))) )
-    return Ap,exUp
+    return Amm, Amp, Ap, exUp, exUmm, exUmp

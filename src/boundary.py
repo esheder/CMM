@@ -135,15 +135,20 @@ def solve(reg, d, Jp):
         Dm, Dp = np.diag(D[:n]), np.diag(D[n:])
         logger.debug('Left region diffusion coefficient:\n%s', Dm)
         logger.debug('Right region diffusion coefficient:\n%s', Dp)
-        Up = np.real( sqrtm( diag_inv(Dp).dot(reg[1].sigA) ) )
-        Um = np.real( sqrtm( diag_inv(Dm).dot(reg[0].sigA) ) )
+        Up =  sqrtm( diag_inv(Dp).dot(reg[1].sigA) )
+        Um =  sqrtm( diag_inv(Dm).dot(reg[0].sigA) )
+        Upi = np.linalg.inv(Up)
+        Umi = np.linalg.inv(Um)
         logger.debug('Square root matrix error, left region:\n%s',
                      Um.dot(Um) - diag_inv(Dm).dot(reg[0].sigA) )
         logger.debug('Square root matrix error, right region:\n%s',
                      Up.dot(Up) - diag_inv(Dp).dot(reg[1].sigA) )
-        Ap, exU = BCsolve(Up,Um,Dp,Dm,Jp,d)
+        Amm, Amp, Ap, exU, exUmm, exUmp = BCsolve(Up,Um,Dp,Dm,Jp,d)
         rm = 3.0*Dm.dot(phi0m) - Dm.dot(d*exU.dot(Ap)) - phi1m
         rp = 3.0*Dp.dot(phi0p) + Dp.dot(d*exU.dot(Ap)) - phi1p
+        #rm = (3.0*Dm.dot( Umi.dot( exUmp.dot(Amp) - exUmm.dot(Amm) - Amp + Amm ) )
+        #      - Dm.dot(d*exU.dot(Ap)) - phi1m)
+        #rp = 3.0*Dp.dot( Upi.dot( exU.dot(Ap) ) ) + Dp.dot(d*exU.dot(Ap)) - phi1p
         return np.concatenate((rm,rp))
 
     #Initial guess is phi1 / (3.0 * phi0)
@@ -186,6 +191,10 @@ if __name__ == '__main__':
     #Jp[0] = 1.0
     d = 20.0
     D = solve(regions, d, Jp)
-    print('Results were:')
-    print(D)
+    n = int(D.shape[0]/2)
+    print('The results are:')
+    print('Left region:')
+    print(D[:n])
+    print('Right region:')
+    print(D[n:])
     logging.shutdown()
