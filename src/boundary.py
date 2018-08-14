@@ -9,6 +9,16 @@ from scipy.linalg import sqrtm
 from scipy.integrate import quad
 from util import *
 from numpy import exp, sinh, sqrt
+import logging
+
+logger = logging.getLogger('main' if __name__ == '__main__' else __name__)
+logger.setLevel(logging.WARNING)
+shndlr = logging.StreamHandler()
+shndlr.setLevel(logging.WARNING)
+shndlr.setFormatter(frmtr)
+logger.addHandler(shndlr)
+logger.addHandler(hndlr)
+
 
 class Region:
     """Data holding object for each region
@@ -122,20 +132,24 @@ def solve(reg, d, Jp):
             First column is left region, second is right region.
 
         """
-        n = D.shape[0]
-        Dm, Dp = np.diag(D[:,0]), np.diag(D[:,1])
-        Up = np.real(sqrtm(diag_inv(Dp).dot(reg[1].sigA)))
-        Um = np.real(sqrtm(diag_inv(Dm).dot(reg[0].sigA)))
+        Dm, Dp = np.diag(D[:n]), np.diag(D[n:])
+        logger.debug('Left region diffusion coefficient:\n%s', Dm)
+        logger.debug('Right region diffusion coefficient:\n%s', Dp)
+        Up = np.real( sqrtm( diag_inv(Dp).dot(reg[1].sigA) ) )
+        Um = np.real( sqrtm( diag_inv(Dm).dot(reg[0].sigA) ) )
+        logger.debug('Square root matrix error, left region:\n%s',
+                     Um.dot(Um) - diag_inv(Dm).dot(reg[0].sigA) )
+        logger.debug('Square root matrix error, right region:\n%s',
+                     Up.dot(Up) - diag_inv(Dp).dot(reg[1].sigA) )
         Ap, exU = BCsolve(Up,Um,Dp,Dm,Jp,d)
-        rm = Dm.dot(phi0m) - Dm.dot(d*exU.dot(Ap)) - phi1m
-        rp = Dp.dot(phi0p) + Dp.dot(d*exU.dot(Ap)) - phi1p
-        return np.vstack((rm,rp)).T
+        rm = 3.0*Dm.dot(phi0m) - Dm.dot(d*exU.dot(Ap)) - phi1m
+        rp = 3.0*Dp.dot(phi0p) + Dp.dot(d*exU.dot(Ap)) - phi1p
+        return np.concatenate((rm,rp))
 
     #Initial guess is phi1 / (3.0 * phi0)
-    guess = np.vstack((np.divide(phi1m, phi0m) / 3.0, np.divide(phi1p, phi0p) / 3.0)).T
-    print('starting nonlinear solver')
-    sol = newton_krylov(residual, guess, method='lgmres')
-    #print(residual(sol))
+    guess = np.concatenate((np.divide(phi1m, phi0m) / 3.0, np.divide(phi1p, phi0p) / 3.0))
+    logger.info('starting nonlinear solver')
+    sol = newton_krylov(residual, guess, method='lgmres', verbose=True)
     return sol
     
 
@@ -149,8 +163,12 @@ if __name__ == '__main__':
     parser.add_argument('-l', default=0.738, type=float,
                         help="Percentage of neutrons that leaked in OpenMC")
     parser.add_argument('-o', help="Output file")
+    parser.add_argument('-debug', action='store_true', help="Flag to make loggers debug")
 
     args = parser.parse_args()
+
+    logger.setLevel(logging.DEBUG if args.debug else logging.WARNING)
+    hndlr.setLevel(logging.DEBUG if args.debug else logging.WARNING)
 
     regions = []
     for f in args.i:
@@ -170,3 +188,4 @@ if __name__ == '__main__':
     D = solve(regions, d, Jp)
     print('Results were:')
     print(D)
+    logging.shutdown()
