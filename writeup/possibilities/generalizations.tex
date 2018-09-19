@@ -1,0 +1,200 @@
+
+\documentclass[a4paper,letterpaper,12pt,oneside,draft]{article}
+
+\usepackage{geometry}
+\geometry{margin=2cm,hoffset=0in, %
+    headheight=0.5\baselineskip}
+\usepackage{times}
+\pagestyle{plain}
+\usepackage{setspace}
+\onehalfspacing
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{listings}
+
+\input{../setup.tex}
+
+\newcommand{\eec}{\;,}
+\newcommand{\eep}{\;.}
+\newcommand{\zth}{0th }
+\newcommand{\fst}{1st }
+\newcommand{\snd}{2nd }
+\newcommand{\OpL}{\mathscr{L}}
+\newcommand{\OpT}{\mathscr{T}}
+\newcommand{\MG}{MG }
+
+\newcommand{\allspace}{\ensuremath{\mathbb{R}^3}}
+\newcommand{\norm}[1]{\left| #1 \right|}
+\newcommand{\bracket}[1]{\ensuremath{\left\langle #1 \right\rangle}}
+\newcommand{\bracketv}[1]{\bracket{#1}_V}
+\newcommand{\bracketvo}[1]{\ensuremath{\bracket{#1}_{V,\Omega}}}
+\newcommand{\bracketR}[1]{\ensuremath{\bracket{#1}_{\allspace}}}
+\newcommand{\bracketex}[2][V]{\ensuremath{\bracket{#2}_{#1}}}
+\newcommand{\bracketsa}[1]{\bracketex[\allspace,\Omega]{#1}}
+\newcommand{\rdotJ}[1][\allspace]{\bracketex[#1]{\vec{r}\cdot\vec{J}}}
+\newcommand{\rsqp}{\bracketR{r^2\phi}}
+\newcommand{\intg}[2][g]{\ensuremath{\int_{E_{#1}}^{E_{#1-1}} #2 dE}}
+\newcommand{\intcg}[2][g]{\ensuremath{\int_{E_{#1}}^{\infty} #2 dE}}
+\newcommand{\vr}{\ensuremath{\vec{r}}}
+\newcommand{\dvr}{\left(\vr-\vr_0\right)}
+\newcommand{\psif}[1][]{\psi(\vr,\Omega#1,E#1)}
+\newcommand{\psifz}[1][]{\psi(\vr,\Omega#1,E#1;\vr_0)}
+\newcommand{\dvrdotJ}{\bracketR{\dvr\cdot\vec{J}}}
+\newcommand{\dvrdotJg}{\bracketR{\dvr\cdot\vec{J_g}}}
+\newcommand{\dvrsqp}{\bracketR{\dvr^2\phi}}
+\newcommand{\dvrsqpg}{\bracketR{\dvr^2\phi_g}}
+\newcommand{\regint}[1]{\ensuremath{\int_{V_0} #1 dV_0}}
+
+\counterwithin{equation}{section}
+
+\title{Possible generalizations to migration based diffusion coefficient definitions}
+\author{Eshed Magali \\ Edward W. Larsen}
+\date{\today}
+
+
+\widowpenalty10000
+\clubpenalty10000
+
+\begin{document}
+\maketitle
+\section{Definitions}
+In single assembly problems, the diffusion coefficients are chosen such that the mean migration distance of migration is preserved. 
+Specifically, the diffusion coefficient is defined according to the following formula:
+\begin{align}
+    \nonumber
+    D_g &\equiv \frac{\intg{\int_{\text{unitcell}} F(\vr_0)\int_{\allspace}\dvr^2 \Bigg[ \Sigma_t(\vr,E)\phi(\vr,E;\vr_0) - \int_0^\infty \Sigma_{s0}(\vr,E'\to E) \phi(\vr,E';\vr_0) dE'\Bigg]dVdV_0}} {6\intg{\int_{\text{unitcell}}F(\vr_0)\int_{\allspace} \phi(\vr,E;\vr_0)dVdV_0}} \\ \nonumber
+    &= \frac{\intg{\int_{\text{unitcell}} F(\vr_0)\int_{\allspace}\OpL_0 \dvr^2 \phi(\vr,E;\vr_0) dVdV_0}} {6\intg{\int_{\allspace} \phi(\vr,E)dV}} \\
+    \label{eq:SingleAssemblyDiffusion:def}
+    &= \frac{\intg{\int_{\text{unitcell}} F(\vr_0)\int_{\allspace}\dvr\cdot\vec{J}(\vr,E;\vr_0) dVdV_0}} {3\intg{\int_{\allspace} \phi(\vr,E)dV}}\eec
+\end{align}
+where $F(\vr)$ is the fission source of the eigenvalue transport problem at $\vr$.
+
+The equivalence of \cref{eq:SingleAssemblyDiffusion:def} to CMM as published by Liu et al.~\cite{Liu2018} appears in my Master's thesis~\cite{EshedThesis}. 
+The numerator of \cref{eq:SingleAssemblyDiffusion:def} is the MC tally in CMM as of 2018~\cite{Liu2018}. 
+The denominator is the group flux in the transport solution of the eigenvalue problem of the single assembly lattice.
+
+This definition causes a preservation of the first moment of migration in the diffusion problem.
+The diffusion problem for a single assembly lattice is homogeneous. 
+In this case, from Fick's law one can derive for any point source in this medium:
+\begin{equation}
+    \vec{J}_g(\vr;\vr_0) = -D_g\nabla\phi_g(\vr;\vr_0)\eec
+\end{equation}
+and this equation can be multiplied by the strength of the diffusion fission source at $\vr_0$ and by $\dvr$ and integrated over all space for the $\vr$ variable and over the volume of the unit cell for $\vr_0$. 
+$F(\vr)$ is constant in space because the solution of the homogeneous diffusion problem is spatially flat.
+This results in the following form:
+\begin{align}
+    \nonumber
+    \int_{\text{unitcell}} F(\vr_0)\int_{\allspace} \dvr\cdot\vec{J}_g(\vr;\vr_0) dVdV_0 &= -D_g \int_{\text{unitcell}} F(\vr_0) \int_{\allspace} \dvr\cdot\nabla \phi_g(\vr;\vr_0)dVdV_0 \\\nonumber
+    &= 3D_g \int_{\text{unitcell}} F(\vr_0) \int_{\allspace}\phi_g(\vr;\vr_0)dVdV_0 \\
+    \label{eq:SingleAssemblyDiffusion:Ficks}
+    &= 3D_g \int_{\allspace}\phi_g(\vr)dV\eep
+\end{align}
+This means that if the integral flux spectrum is preserved between the transport and diffusion problem, which is guaranteed by the choice of the cross sections, then so will the first moment of migration.
+This is a result of the combination of \cref{eq:SingleAssemblyDiffusion:def,eq:SingleAssemblyDiffusion:Ficks}.
+
+The philosophy of this is that we try to preserve how far away neutrons stream from their point of origin, so that neutrons born in the diffusion problem travel on average similar distances from their origin.
+
+When the diffusion problem is no longer infinite and homogeneous, there could be many ways to generalize this quantity.
+First, there is the question of what the diffusion problem's fission source should look like in \cref{eq:SingleAssemblyDiffusion:Ficks}.
+The only effect this has is on the exact interpretation of that function in that equation, and on the data needed to assign values to it.
+Second, there is the question of whether we should preserve what neutrons born within a given region do, or if we should preserve the migration of neutrons that fly through a given cell, regardless of if they were born in it.
+
+Lastly, we can attempt to define the neutron's behavior not with a homogenized colorset where each homogenized assembly is next to different homogenized assemblies but rather by driving an infinite homogeneous problem with the transport information.
+This option might seem unphysical, because the homogenized problem is not simply a homogenization of the transport problem. 
+However, it most accurately relates to the idea that the diffusion coefficient is a property of the material itself and not determined by other materials around it.
+
+\subsection{Fission source distribution definition}
+The main three options that we see are that one can use a homogeneous fission source, the transport problem's fission source or the resulting diffusion problem's fission source. 
+Using a homogeneous fission source assumes that since the region is homogenized, the source in it should be treated as spatially flat too.
+This choice is mostly compatible with CMM's results, but the last line in \cref{eq:SingleAssemblyDiffusion:Ficks} will no longer be true, as the fission source is no longer related to the actual fission source in the diffusion problem.
+This will imply in most cases that Fick's law no longer relates the scalar flux to the first migration moment.
+This is a major flaw, as one must then cause the preservation of a Green's function preservation rather than the scalar flux.
+Cases where the relation only involves the scalar flux would still be considered later.
+
+Defining the fission source within a region using the heterogeneous transport fission source asks the question "were we to simply change the physics of how neutrons move without changing their point of birth, what would that effect be".
+However, this has two significant flaws.
+First, the material in the diffusion problem is homogenized in space and in energy.
+The physics has already changed by that, so the driving philosophy is already invalid, except for already-homogeneous problems.
+Second, using the transport problem's fission source is not compatible with what CMM currently does.
+CMM currently assigns a flat fission source (which is also the diffusion problem's eigenvalue fission source), and this change would require a change for single assembly problems as well.
+Therefore we will not consider these options further.
+
+Lastly, the fission source can be defined as the fission source determined by solving the multigroup homogenized diffusion problem.
+This is an implicit mathematical definition.
+The diffusion coefficient is theoretically defined after one already knows the distribution of the fission source in the diffusion problem, although this fission source distribution depends on the diffusion coefficient values.
+This can, however, be treated in two separate ways.
+
+First, one can use a definition where one does not actually need to know the exact value of this distribution.
+This is done using Green's theory, through the transition used in the last line of \cref{eq:SingleAssemblyDiffusion:Ficks}.
+Second, one can use a non-linear iteration to look for diffusion coefficients that cause the required preservation.
+One acquires a non-linear equation that defines the first migration moment in terms of the diffusion coefficient and the scalar flux.
+Then the diffusion coefficient is iterated until preservation of the transport first migration moment is achieved.
+
+\subsection{Tallying by source region or by flight region}
+In color set problems, neutrons can fly through regions in the transport problems that do not resemble their origin.
+This raises the question, do we want to preserve for each region how far away neutrons that are born in that region migrate from their point of origin on average?
+Or rather, do we want to preserve the migration neutrons have through a given region?
+
+Mathematically, this has an effect on the region of integration.
+In a single assembly problem we integrate the possible flight paths through all of space, and the fission source location over the entire unit cell, as seen in the LHS of \cref{eq:SingleAssemblyDiffusion:Ficks}.
+When we consider a color set problem, we must obtain a different diffusion coefficient for each region. We must therefore limit our integrals so that we can possibly get a different diffusion coefficient for each region.
+Therefore we can either limit the flight path integral, the source range integral, or both.
+Limiting both makes little sense, in our opinion, as it means that we only count the flight paths neutrons have through a specific cell if they were also born in a cell of that type.
+It will have the weaknesses of both methods and less strengths.
+
+
+
+Each of these definitions has strengths and weaknesses. 
+Some of them are compatible with single-assembly CMM, some are not.
+These methods are compared in \cref{tbl:options}.
+
+\begin{table}[h!]
+    \caption{A comparison of different options for diffusion coefficient methodologies.}\label{tbl:options}
+    \begin{tabular}{|c|c|c|c|}
+        \hline
+        Definition number & Strengths & Weaknesses & Mathematical properties \\
+        \hline
+        \#1 & CMM Compatible & Fission required & $F(\vr_0)$ is constant in diffusion \\
+        & & Difficult implementation & Tally tracked by region of birth \\
+        & & Unclear interpretation & See \cref{eq:def:1} \\
+        \hline
+        \#2 & & Source spectrum undefined & $F(\vr_0)$ is constant in diffusion \\
+        & & Difficult implementation & Tally tracked by region of flight \\
+        & & Unclear interpretation & See \cref{eq:def:2} \\
+        \hline
+        \#3 & CMM Compatible & Fission required & $F(\vr_0)$ is constant in diffusion \\
+        & Easy implementation & & Tally tracked by region of birth \\
+        & & & See \cref{eq:def:3} \\
+        \hline
+        \#4 & CMM Compatible & Fission required & $F(\vr_0)$ is constant in diffusion \\
+        & Easy implementation & Source spectrum undefined & Tally tracked by region of flight \\
+        & &  & See \cref{eq:def:4} \\
+        \hline
+        \#5 & & Fission required & $F(\vr_0)$ is taken directly from transport \\
+        & & Difficult implementation & Tally tracked by region of birth \\
+        & & Unclear interpretation & See \cref{eq:def:1} \\
+        & & Not backward compatible & \\
+        \hline
+        \#6 & & Source spectrum undefined & $F(\vr_0)$ is constant in diffusion \\
+        & & Difficult implementation & Tally tracked by region of flight \\
+        & & Unclear interpretation & See \cref{eq:def:2} \\
+        \hline
+    \end{tabular}
+\end{table}
+
+\end{document}
+
+\begin{comment}
+\begin{enumerate}
+\item If we were to drop a neutron randomly inside the homogenized region, we would want it to travel, on average, the same distance that neutrons born in the region traveled in the transport problem.
+\item If we were to drop a neutron randomly inside the homogenized region, we would want it to travel, on average, the same distance that neutrons traveled in this region in the transport problem.
+\item If we were to drop a neutron randomly in an infinite homogeneous space made up of the homogenized region, we would want it to travel, on average, the same distance that neutrons born in the region traveled in the transport problem.
+\item If we were to drop a neutron randomly in an infinite homogeneous space made up of the homogenized region, we would want it to travel, on average, the same distance that neutrons traveled in this region in the transport problem.
+\item If we were to drop a neutron according to the transport fission source inside the homogenized region, we would want it to travel, on average, the same distance that neutrons born in the region traveled in the transport problem.
+\item If we were to drop a neutron according to the transport fission source inside the homogenized region, we would want it to travel, on average, the same distance that neutrons born in the region traveled in the transport problem.
+\item Neutrons born in the diffusion problem according to the diffusion fission source should travel on average the same distance that neutrons traveled in this region in the transport problem.
+\item The average distance neutrons migrate away from their origin (the first migration moment) covered by neutrons in the cell in the diffusion problem should be the same as in the transport problem, given only that the integral scalar flux energy distribution is preserved.
+\item The average distance neutrons migrate away from their origin covered by neutrons in the cell in the diffusion problem should be the same as in the transport problem, given that the scalar flux distribution is preserved and that surface terms are preserved on each surface.
+\item Neutrons who enter the homogenized region through birth or streaming are kept as a driving source of migration (each carries its original point of birth). This source is treated as an input source on an infinite homogeneous diffusion problem, and the diffusion coefficient is chosen so that on average the migration moment in the diffusion problem is the same as in the transport problem.
+\end{enumerate}
+\end{comment}
