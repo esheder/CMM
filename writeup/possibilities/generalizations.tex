@@ -220,10 +220,10 @@ It has to be tested to see which definition is actually the correct one, if any.
 
 \subsection{A diffusion fission distributed, source region based method}
 In this case we tally $T_{g,i}$ according to \cref{eq:Tally:limitsource}, and use the diffusion fission distribution. \cref{eq:SingleAssemblyDiffusion:Ficks} works slightly different now:
-
 \begin{align}
     \nonumber
-    \int_{V_i} F(\vr_0)\int_{\allspace} \dvr\cdot\vec{J}_g(\vr;\vr_0) dVdV_0 &= -D_g \int_{V_i} F(\vr_0) \int_{\allspace} \dvr\cdot\nabla \phi_g(\vr;\vr_0)dVdV_0 \\\nonumber
+    \int_{V_i} F(\vr_0)\int_{\allspace} \dvr\cdot\vec{J}_g(\vr;\vr_0) dVdV_0 &= -D_g \int_{V_i} F(\vr_0) \int_{\allspace} \dvr\cdot\nabla \phi_g(\vr;\vr_0)dVdV_0 \\
+    \label{eq:DiffFissSource}
     &= 3D_g \int_{V_i}F(\vr_0)\int_{\allspace}\phi_g(\vr;\vr_0)dVdV_0 
 \end{align}
 Notice that the right hand side requires that we know the total fraction of the scalar flux that originates from within region $i$, but requires no surface terms.
@@ -235,6 +235,21 @@ Unlike the surface terms from the previous definition, these terms are fairly ea
 
 Again, there is no reason to prefer one definition over the other, or those from the previous method.
 Selection should depend on which is good enough in cases of interest and is implementable in practice.
+
+\subsection{A homogenized fission distributed, source region based, separated infinite homogeneous method}
+In this case we tally $T_{g,i}$ according to \cref{eq:Tally:limitsource}, and use a homogenized fission distribution.
+This causes the Fick's law equation to be almost identical to that in \cref{eq:SingleAssemblyDiffusion:Ficks}. 
+The only difference is in the regions of integration:
+\begin{align}
+    \nonumber
+    \int_{V_i} F(\vr_0)\int_{\allspace} \dvr\cdot\vec{J}_g(\vr;\vr_0) dVdV_0 &= -D_g \int_{V_i} F(\vr_0) \int_{\allspace} \dvr\cdot\nabla \phi_g(\vr;\vr_0)dVdV_0 \\\nonumber
+    &= 3D_g \int_{V_i} F(\vr_0) \int_{\allspace}\phi_g(\vr;\vr_0)dVdV_0 \\
+    \label{eq:HomFissSourceInf}
+    &= 3D_g \int_{\allspace}\phi_g(\vr)dV\eec
+\end{align}
+but because in the homogenized problem the homogenized fission distribution is appropriate, the equation is simplified just as it did before.
+This means that the diffusion coefficient takes the same value it did in CMM, up to the necessary change in tallies such that they attribute interactions and flight paths to the origin's region.
+We find this method less appealing, but we have no proof if it is flawed, and it should be fairly easy to test.
 
 \section{Tabling the different options}
 
