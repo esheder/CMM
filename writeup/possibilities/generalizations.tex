@@ -133,7 +133,7 @@ Then the diffusion coefficient is iterated until preservation of the transport f
 \subsection{Tallying by source region or by flight region}
 In color set problems, neutrons can fly through regions in the transport problems that do not resemble their origin.
 This raises the question, do we want to preserve for each region how far away neutrons that are born in that region migrate from their point of origin on average?
-Or rather, do we want to preserve the migration neutrons have through a given region?
+Or rather, do we want to preserve the migration neutrons do through a given region?
 
 Mathematically, this has an effect on the region of integration.
 In a single assembly problem we integrate the possible flight paths through all of space, and the fission source location over the entire unit cell, as seen in the LHS of \cref{eq:SingleAssemblyDiffusion:Ficks}.
@@ -142,7 +142,31 @@ Therefore we can either limit the flight path integral, the source range integra
 Limiting both makes little sense, in our opinion, as it means that we only count the flight paths neutrons have through a specific cell if they were also born in a cell of that type.
 It will have the weaknesses of both methods and less strengths.
 
+Limiting the source range would require tallying according to the following formula:
+\begin{align}
+    \nonumber
+    T_{g,i} &= \frac{\intg{\int_{V_i}F(\vr_0)\int_{\allspace}\dvr^2\OpL_0\phi(\vr,E;\vr_0)dVdV_0}} {6\intg{\int_{V_i}F(\vr_0)\int_{\allspace}\phi(\vr,E;\vr_0)dVdV_0}} \\
+    \label{eq:Tally:limitsource}
+    &= \frac{\intg{\int_{V_i}F(\vr_0)\int_{\allspace}\dvr\cdot\vec{J}(\vr,E;\vr_0)dVdV_0}} {3\intg{\int_{V_i}F(\vr_0)\int_{\allspace}\phi(\vr,E;\vr_0)dVdV_0}}\eec
+\end{align}
+where $V_i$ is a single region of type $i$ in the infinite lattice of the transport problem.
+This means that whenever a neutron path or interaction happens in any region, one counts it towards the tally of the neutron's ORIGIN's region.
 
+Limiting the flight path would require tallying differently, according to the following formula:
+\begin{align}
+    \nonumber
+    T_{g,i} &= \frac{\intg{\int_{\text{unitcell}}F(\vr_0)\int_{V_i^\infty} \dvr^2\OpL_0\phi(\vr,E;\vr_0)dVdV_0}} {6\intg{\int_{\text{unitcell}}F(\vr_0)\int_{V_i^\infty}\phi(\vr,E;\vr_0)dVdV_0}} \\
+    \label{eq:Tally:limitflight}
+    &= \frac{\intg{\int_{\text{unitcell}}F(\vr_0)\int_{V_i^\infty} \dvr\cdot\vec{J}(\vr,E;\vr_0)dVdV_0}} {3\intg{\int_{\text{unitcell}}F(\vr_0)\int_{V_i^\infty}\phi(\vr,E;\vr_0)dVdV_0}}\eec
+\end{align}
+where $V_i^\infty$ is the entire infinite volume of the full 3D infinite lattice that contains regions of type $i$.
+This means that neutrons contribute to the tally of regions of type $i$ whenever they interact or move through a region of type $i$, regardless of their region of origin.
+
+Using the second method, where tallies are assigned to the location of traversal, allows us to homogenize regions that have no internal fission source.
+However, using this method will lead to a more complicated implementation for the definition of diffusion coefficients that includes surface terms.
+These surface terms can result in a non-linear relation to define the diffusion coefficient, which would require an iterative search.
+It can be circumvented by defining the diffusion coefficients using not only the diffusion flux but also including some surface tallies.
+Even so, these surface tallies can be difficult to accurately obtain using Monte Carlo methods.
 
 Each of these definitions has strengths and weaknesses. 
 Some of them are compatible with single-assembly CMM, some are not.
