@@ -38,6 +38,7 @@
 \newcommand{\vr}{\ensuremath{\vec{r}}}
 \newcommand{\dvr}{\left(\vr-\vr_0\right)}
 \newcommand{\psif}[1][]{\psi(\vr,\Omega#1,E#1)}
+\newcommand{\psifz}[1][]{\psi(\vr,\Omega#1,E#1;\vr_0)}
 \newcommand{\dvrdotJ}{\bracketR{\dvr\cdot\vec{J}}}
 \newcommand{\dvrdotJg}{\bracketR{\dvr\cdot\vec{J_g}}}
 \newcommand{\dvrsqp}{\bracketR{\dvr^2\phi}}
@@ -78,12 +79,12 @@
         \label{eq:Diff}
             \forall x>0, \quad-\nabla D_g(\vr)\nabla\phi_g(\vr) + \Sigma_{t,g}(\vr)\phi_g(\vr) &= \sum_{g'=1}^G\Sigma_{s0}^{g'\to g}(\vr)\phi_{g'}(\vr) \eec\\
         \label{eq:Diff:BC}
-            \phi_g(0) - 3D(0)\nabla\phi_g(0) &= \intg{\int_{\Omega\cdot\hat{x}>0}\Omega\psi_b(\Omega,E)d\Omega} \eec\\
+            \frac{1}{4}\phi_g(0) - \frac{1}{2}D(0)\nabla\phi_g(0) &= \intg{\int_{\Omega\cdot\hat{x}>0}\Omega\psi_b(\Omega,E)d\Omega} \eec\\
             \lim\limits_{x\to\infty}\phi_g(x) &= 0 \eec\\
         \label{eq:Diff:IC}
             \phi_g(d^-) &= \phi_g(d^+) \eec\\
             \nonumber
-            \frac{d\phi_g}{dx}(d^-) &= \frac{d\phi_g}{dx}(d^+)\eec
+            D(d^-)\frac{d\phi_g}{dx}(d^-) &= D(d^+)\frac{d\phi_g}{dx}(d^+)\eec
     \end{align}
     where all of the multigroup parameters are histogram functions in space.
     For example:
@@ -114,17 +115,55 @@
     Our physical quantity of interest would be denoted $\Phi_{g^i}$. The transport value for this quantity would be defined as:
     \begin{align}
         \label{eq:Phi1:Transport}
-        \Phi_{g,t}^1 &= \int_{0}^{d}\intg{x\cdot \vec{J}(x,E)}dx \eec \\\nonumber
-        \Phi_{g,t}^2 &= \int_{d}^{\infty}\intg{x\cdot \vec{J}(x,E)}dx \eec
+        \Phi_{g,t}^1 &= \iint_{-\infty}^{\infty}\int_{0}^{d}\intg{\vr\cdot \vec{J}(x,E)}dxdydz \eec \\\nonumber
+        \Phi_{g,t}^2 &= \iint_{-\infty}^{\infty}\int_{d}^{\infty}\intg{\vr\cdot \vec{J}(x,E)}dxdydz \eec
     \end{align}
     where $\vec{J}(x,E)$ is the neutron current for the solution of \cref{eq:BTE,eq:BTE:BC}.
-    The diffusion value for this quantity would be defined as:
+    Notice that we don't really need to do this with the point-source breakdown because of symmetry to translations across the left boundary.
+    For rigor this writeup is included.
+    We start by looking at all point boundary source problems:
+    \begin{align}
+    \nonumber
+    \forall x>0,\quad \Omega\cdot\nabla\psifz &+ \Sigma_t(E)\psifz \eec \\ 
+    \label{eq:BTE:PS}
+    =& \frac{1}{4\pi}\int_0^\infty\int_{4\pi}\Sigma_{s}(E'\to E,\Omega\cdot\Omega')\psifz[']d\Omega'dE' \eec\\
+    \label{eq:BTE:PS:BC}
+    \forall\  \Omega\cdot\hat{x}>0\  \forall y\  \forall z, \quad &
+    \psi(0,y,z,\Omega,E;\vr_0) = \begin{cases}
+    \psi_b(\Omega,E) & y=y_0, z=z_0 \\ 0 & \text{otherwise}
+    \end{cases}\eec \\\nonumber
+    \lim\limits_{\vr\to\infty}&\psi(\vr,\Omega,E) = 0 \eep
+    \end{align}
+    which allows us to define the point source current $J(\vr,E;\vr_0)$ as usual. We then define the fully rigorous quantity as:
+    \begin{align}
+    \label{eq:Phi1:Transport:Full}
+        \Phi_{g,t}^1 &= \frac{1}{YZ} \int_{-\frac{Z}{2}}^{\frac{Z}{2}} \int_{-\frac{Y}{2}}^{\frac{Y}{2}} \iint_{-\infty}^{\infty} \int_{0}^{d} \intg{\dvr\cdot \vec{J}(\vr,E;\vr_0)}dxdydzdy_0dz_0 \eec \\\nonumber
+        \Phi_{g,t}^2 &= \frac{1}{YZ} \int_{-\frac{Z}{2}}^{\frac{Z}{2}} \int_{-\frac{Y}{2}}^{\frac{Y}{2}} \iint_{-\infty}^{\infty} \int_{d}^{\infty} \intg{\dvr\cdot \vec{J}(\vr,E;\vr_0)}dxdydzdy_0dz_0 \eep
+    \end{align}
+    We will never need to simplify or find other forms for these quantities, and we can simply assume they are given from a MC simulation of the problem or otherwise obtained.
+    
+    For the diffusion problem we can similarly do a point-source breakdown. We define the point source diffusion equations as:
+    \begin{align}
+    \label{eq:Diff:PS}
+    \forall x>0, \quad-\nabla D_g(\vr)\nabla\phi_g(\vr;\vr_0) + \Sigma_{t,g}(\vr)\phi_g(\vr;\vr_0) &= \sum_{g'=1}^G\Sigma_{s0}^{g'\to g}(\vr)\phi_{g'}(\vr;\vr_0) \eec\\
+    \label{eq:Diff:PS:BC}
+    \frac{1}{4}\phi_g(0,y,z;\vr_0) - \frac{1}{2}D^1\nabla\phi_g(0,y,z;\vr_0) &= \begin{cases}
+    J^+ & y=y_0, z=z_0 \\
+    0 & \text{otherwise}
+    \end{cases} \eec\\\nonumber
+    \lim\limits_{\vr\to\infty}\phi_g(\vr;\vr_0) &= 0 \eec\\
+    \label{eq:Diff:PS:IC}
+    \phi_g(d^-,y,z;\vr_0) &= \phi_g(d^+,y,z;\vr_0) \eec\\
+    \nonumber
+    D^1\frac{d\phi_g}{dx}(d^-,y,z;\vr_0) &= D^2\frac{d\phi_g}{dx}(d^+,y,z;\vr_0)\eec
+    \end{align}
+    The diffusion value for the quantity of interest similar to \cref{eq:Phi1:Transport:Full} would then be:
     \begin{align}
         \label{eq:Phi1:Diffusion}
-        \Phi_{g,d}^1 &= -\int_{0}^{d}x\cdot D_g^1\nabla\phi_g(x)dx \eec \\\nonumber
-        \Phi_{g,d}^2 &= -\int_{d}^{\infty}x\cdot D_g^2\nabla\phi_g(x)dx \eec
+        \Phi_{g,d}^1 &= \frac{1}{YZ} \int_{-\frac{Z}{2}}^{\frac{Z}{2}} \int_{-\frac{Y}{2}}^{\frac{Y}{2}} \iint_{-\infty}^{\infty} \int_{0}^{d} \dvr\cdot \vec{J}_g(\vr;\vr_0)dxdydzdy_0dz_0 \eec \\\nonumber
+        \Phi_{g,d}^2 &= \frac{1}{YZ} \int_{-\frac{Z}{2}}^{\frac{Z}{2}} \int_{-\frac{Y}{2}}^{\frac{Y}{2}} \iint_{-\infty}^{\infty} \int_{d}^{\infty} \dvr\cdot \vec{J}_g(\vr;\vr_0)dxdydzdy_0dz_0 \eec
     \end{align}
-    where $\phi_g(x)$ is the solution to \cref{eq:Diff,eq:Diff:BC,eq:Diff:IC}.
+    where $J_g(\vr;\vr_0)=-D_g(\vr)\nabla\phi(\vr;\vr_0)$ is the current of the diffusion problem in \cref{eq:Diff:PS,eq:Diff:PS:BC,eq:Diff:PS:IC}. 
     
 \section{Semi-Analytic solution}
     Suppose the diffusion coefficients were given. We will now find an analytical expression for $\Phi_{g,d}^{i}$ for $i\in\{1,2\}$.
