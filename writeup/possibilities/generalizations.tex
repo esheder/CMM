@@ -130,6 +130,9 @@ Second, one can use a non-linear iteration to look for diffusion coefficients th
 One acquires a non-linear equation that defines the first migration moment in terms of the diffusion coefficient and the scalar flux.
 Then the diffusion coefficient is iterated until preservation of the transport first migration moment is achieved.
 
+\subsubsection*{Naming}
+When naming a diffusion coefficient definition, we call it either a homogeneous fission distributed method if the fission distribution is constant in space or a diffusion fission distributed method if the diffusion problem's eigenvalue fission source is used.
+
 \subsection{Tallying by source region or by flight region}
 In color set problems, neutrons can fly through regions in the transport problems that do not resemble their origin.
 This raises the question, do we want to preserve for each region how far away neutrons that are born in that region migrate from their point of origin on average?
@@ -145,9 +148,9 @@ It will have the weaknesses of both methods and less strengths.
 Limiting the source range would require tallying according to the following formula:
 \begin{align}
     \nonumber
-    T_{g,i} &= \frac{\intg{\int_{V_i}F(\vr_0)\int_{\allspace}\dvr^2\OpL_0\phi(\vr,E;\vr_0)dVdV_0}} {6\intg{\int_{V_i}F(\vr_0)\int_{\allspace}\phi(\vr,E;\vr_0)dVdV_0}} \\
+    T_{g,i} &= \intg{\int_{V_i}F(\vr_0)\int_{\allspace}\dvr^2\OpL_0\phi(\vr,E;\vr_0)dVdV_0} \\
     \label{eq:Tally:limitsource}
-    &= \frac{\intg{\int_{V_i}F(\vr_0)\int_{\allspace}\dvr\cdot\vec{J}(\vr,E;\vr_0)dVdV_0}} {3\intg{\int_{V_i}F(\vr_0)\int_{\allspace}\phi(\vr,E;\vr_0)dVdV_0}}\eec
+    &= \intg{\int_{V_i}F(\vr_0)\int_{\allspace}\dvr\cdot\vec{J}(\vr,E;\vr_0)dVdV_0} \eec
 \end{align}
 where $V_i$ is a single region of type $i$ in the infinite lattice of the transport problem.
 This means that whenever a neutron path or interaction happens in any region, one counts it towards the tally of the neutron's ORIGIN's region.
@@ -155,9 +158,9 @@ This means that whenever a neutron path or interaction happens in any region, on
 Limiting the flight path would require tallying differently, according to the following formula:
 \begin{align}
     \nonumber
-    T_{g,i} &= \frac{\intg{\int_{\text{unitcell}}F(\vr_0)\int_{V_i^\infty} \dvr^2\OpL_0\phi(\vr,E;\vr_0)dVdV_0}} {6\intg{\int_{\text{unitcell}}F(\vr_0)\int_{V_i^\infty}\phi(\vr,E;\vr_0)dVdV_0}} \\
+    T_{g,i} &= \intg{\int_{\text{unitcell}}F(\vr_0)\int_{V_i^\infty} \dvr^2\OpL_0\phi(\vr,E;\vr_0)dVdV_0} \\
     \label{eq:Tally:limitflight}
-    &= \frac{\intg{\int_{\text{unitcell}}F(\vr_0)\int_{V_i^\infty} \dvr\cdot\vec{J}(\vr,E;\vr_0)dVdV_0}} {3\intg{\int_{\text{unitcell}}F(\vr_0)\int_{V_i^\infty}\phi(\vr,E;\vr_0)dVdV_0}}\eec
+    &= \intg{\int_{\text{unitcell}}F(\vr_0)\int_{V_i^\infty} \dvr\cdot\vec{J}(\vr,E;\vr_0)dVdV_0}\eec
 \end{align}
 where $V_i^\infty$ is the entire infinite volume of the full 3D infinite lattice that contains regions of type $i$.
 This means that neutrons contribute to the tally of regions of type $i$ whenever they interact or move through a region of type $i$, regardless of their region of origin.
@@ -167,6 +170,73 @@ However, using this method will lead to a more complicated implementation for th
 These surface terms can result in a non-linear relation to define the diffusion coefficient, which would require an iterative search.
 It can be circumvented by defining the diffusion coefficients using not only the diffusion flux but also including some surface tallies.
 Even so, these surface tallies can be difficult to accurately obtain using Monte Carlo methods.
+
+\subsubsection*{Naming}
+We call a method either source region based if we group tallies according to the neutron's region of origin or flight region based if we group tallies according to the neutron's point of interaction (or flight path).
+
+\subsection{Different homogenized problems for each region}
+The most appealing philosophy, in our opinion, is when the homogenized diffusion problem being considered is the homogenized color set problem.
+In this case the same homogenized problem is used to determine the multigroup cross sections and the diffusion coefficient, and the only difference is through which physical quantities they are chosen to preserve.
+In a homogenized color set problem the spatial description is essentially a lattice where each cell is given a homogeneous color with homogeneous parameters, with no internal details.
+However, this means that in the diffusion problem, and thus in the resulting definitions, the diffusion coefficients can depend not only on the flux spectrum within the homogenized cell but on the spectrum outside it as well.
+This can happen with the introduction of surface terms, or with the tally of neutron flight paths through other regions.
+One can potentially generalize CMM in a way that circumvents this altogether.
+
+If for every cell we assume the homogenized diffusion problem that defines its diffusion coefficient is an infinite homogeneous problem, we will get a relatively simple derivation.
+It doesn't make sense to include tallies from regions other than the neutron's internal source in this case, because they have no equivalent in the homogenized diffusion problem.
+Therefore this is only truly compatible with tallying the neutrons by source region, and thus this is limited to cells with internal fission sources.
+
+\subsubsection*{Naming}
+When a definition uses infinite homogeneous diffusion problems we call it a separated infinite homogeneous definition.
+
+\section{Picking appealing options}
+The preferred fission source distribution in our opinion is the diffusion fission source, and we find the homogenized color set problem more appealing than a set of infinite homogeneous problems for each region. 
+We are unsure about which tally scheme is preferable, and have different opinions on the matter.
+In this section we specify the details for several methods that we find relatively appealing.
+We start with the two we support most, and work our way down.
+
+\subsection{A diffusion fission distributed, flight region based method}
+In this case we tally $T_{g,i}$ according to \cref{eq:Tally:limitflight}, and use the diffusion fission distribution. \cref{eq:SingleAssemblyDiffusion:Ficks} works slightly different now:
+\begin{align}
+    \nonumber
+    \int_{\text{unitcell}} F(\vr_0)\int_{V_i^\infty} \dvr\cdot\vec{J}_g(\vr;\vr_0) dVdV_0 &= -D_{g,i} \int_{\text{unitcell}} F(\vr_0) \int_{V_i^\infty} \dvr\cdot\nabla \phi_g(\vr;\vr_0)dVdV_0 \\\nonumber
+    &= 3D{g,i} \int_{V_i^\infty}\phi_g(\vr)dV \\ 
+    \label{eq:DiffFissFlight}
+    &\quad -D{g,i}\int_{\text{unitcell}} F(\vr_0) \int_{\partial V_i^\infty}\phi_g(\vr;\vr_0)\dvr\cdot dAdV_0 \eep
+\end{align}
+The left hand side is nothing but the tally in \cref{eq:Tally:limitflight}, and can be considered to be a known quantity we want to obtain.
+The right hand side includes both the familiar term with the scalar flux we make sure is preserved and a surface quantity. 
+If we tally this quantity on each surface between assemblies with its own tally, we can plug in all these tallied quantities and solve easily for the diffusion coefficient.
+Notice, however, that this tally can be difficult to calculate in Monte Carlo. 
+This requires knowledge of the scalar flux on a boundary.
+
+Another option exists. 
+We can for any given diffusion coefficient calculate the diffusion value of this surface term, be it by directly solving the Green's function problem for the homogenized diffusion problem or by other means.
+Once this quantity is obtained, it can be compared to the tallied left hand side, and we can iteratively search for a diffusion coefficient value that matches the two sides of \cref{eq:DiffFissFlight}.
+This is what we attempted for the boundary source problem, but had convergence issues.
+
+Notice that we have no a priori reason to know which method is better.
+It has to be tested to see which definition is actually the correct one, if any.
+
+\subsection{A diffusion fission distributed, source region based method}
+In this case we tally $T_{g,i}$ according to \cref{eq:Tally:limitsource}, and use the diffusion fission distribution. \cref{eq:SingleAssemblyDiffusion:Ficks} works slightly different now:
+
+\begin{align}
+    \nonumber
+    \int_{V_i} F(\vr_0)\int_{\allspace} \dvr\cdot\vec{J}_g(\vr;\vr_0) dVdV_0 &= -D_g \int_{V_i} F(\vr_0) \int_{\allspace} \dvr\cdot\nabla \phi_g(\vr;\vr_0)dVdV_0 \\\nonumber
+    &= 3D_g \int_{V_i}F(\vr_0)\int_{\allspace}\phi_g(\vr;\vr_0)dVdV_0 
+\end{align}
+Notice that the right hand side requires that we know the total fraction of the scalar flux that originates from within region $i$, but requires no surface terms.
+The problem is, of course, that we need this fraction for the diffusion problem. 
+We can assume that the total flux in each region is preserved from reaction rate preservation. 
+However, the fraction of the flux that comes from each specific region is not preserved, and must either be calculated or tallied.
+The same problems we had for the surface problems exist if we choose to have this calculated, because this depends on the diffusion coefficient and causes an implicit definition for the diffusion coefficient.
+Unlike the surface terms from the previous definition, these terms are fairly easy to obtain in Monte Carlo.
+
+Again, there is no reason to prefer one definition over the other, or those from the previous method.
+Selection should depend on which is good enough in cases of interest and is implementable in practice.
+
+\section{Tabling the different options}
 
 Each of these definitions has strengths and weaknesses. 
 Some of them are compatible with single-assembly CMM, some are not.
