@@ -222,9 +222,9 @@ It has to be tested to see which definition is actually the correct one, if any.
 In this case we tally $T_{g,i}$ according to \cref{eq:Tally:limitsource}, and use the diffusion fission distribution. \cref{eq:SingleAssemblyDiffusion:Ficks} works slightly different now:
 \begin{align}
     \nonumber
-    \int_{V_i} F(\vr_0)\int_{\allspace} \dvr\cdot\vec{J}_g(\vr;\vr_0) dVdV_0 &= -D_g \int_{V_i} F(\vr_0) \int_{\allspace} \dvr\cdot\nabla \phi_g(\vr;\vr_0)dVdV_0 \\
+    \int_{V_i} F(\vr_0)\int_{\allspace} \dvr\cdot\vec{J}_g(\vr;\vr_0) dVdV_0 &= -D_{g,i} \int_{V_i} F(\vr_0) \int_{\allspace} \dvr\cdot\nabla \phi_g(\vr;\vr_0)dVdV_0 \\
     \label{eq:DiffFissSource}
-    &= 3D_g \int_{V_i}F(\vr_0)\int_{\allspace}\phi_g(\vr;\vr_0)dVdV_0 
+    &= 3D_{g,i} \int_{V_i}F(\vr_0)\int_{\allspace}\phi_g(\vr;\vr_0)dVdV_0 
 \end{align}
 Notice that the right hand side requires that we know the total fraction of the scalar flux that originates from within region $i$, but requires no surface terms.
 The problem is, of course, that we need this fraction for the diffusion problem. 
@@ -242,51 +242,32 @@ This causes the Fick's law equation to be almost identical to that in \cref{eq:S
 The only difference is in the regions of integration:
 \begin{align}
     \nonumber
-    \int_{V_i} F(\vr_0)\int_{\allspace} \dvr\cdot\vec{J}_g(\vr;\vr_0) dVdV_0 &= -D_g \int_{V_i} F(\vr_0) \int_{\allspace} \dvr\cdot\nabla \phi_g(\vr;\vr_0)dVdV_0 \\\nonumber
-    &= 3D_g \int_{V_i} F(\vr_0) \int_{\allspace}\phi_g(\vr;\vr_0)dVdV_0 \\
+    \int_{V_i} F(\vr_0)\int_{\allspace} \dvr\cdot\vec{J}_g(\vr;\vr_0) dVdV_0 &= -D_{g,i} \int_{V_i} F(\vr_0) \int_{\allspace} \dvr\cdot\nabla \phi_g(\vr;\vr_0)dVdV_0 \\\nonumber
+    &= 3D_{g,i} \int_{V_i} F(\vr_0) \int_{\allspace}\phi_g(\vr;\vr_0)dVdV_0 \\
     \label{eq:HomFissSourceInf}
-    &= 3D_g \int_{\allspace}\phi_g(\vr)dV\eec
+    &= 3D_{g,i} \int_{\allspace}\phi_g(\vr)dV\eec
 \end{align}
 but because in the homogenized problem the homogenized fission distribution is appropriate, the equation is simplified just as it did before.
 This means that the diffusion coefficient takes the same value it did in CMM, up to the necessary change in tallies such that they attribute interactions and flight paths to the origin's region.
 We find this method less appealing, but we have no proof if it is flawed, and it should be fairly easy to test.
+The diffusion coefficients, as mentioned before, answer the question about neutron migration within the homogenized material, but try to preserve leakage that happens elsewhere.
 
 \section{Tabling the different options}
 
-Each of these definitions has strengths and weaknesses. 
-Some of them are compatible with single-assembly CMM, some are not.
-These methods are compared in \cref{tbl:options}.
-
 \begin{table}[h!]
-    \caption{A comparison of different options for diffusion coefficient methodologies.}\label{tbl:options}
-    \begin{tabular}{|c|c|c|c|}
+    \caption{Comparison of the three methodologies.}\label{tbl:options}
+    \begin{tabular}{|c|c|c|}
         \hline
-        Definition number & Strengths & Weaknesses & Mathematical properties \\
+        Method & Strengths & Weaknesses \\
         \hline
-        \#1 & CMM Compatible & Fission required & $F(\vr_0)$ is constant in diffusion \\
-        & & Difficult implementation & Tally tracked by region of birth \\
-        & & Unclear interpretation & See \cref{eq:def:1} \\
+        \#1 & Works with all color sets & Either non-linear \\
+        & Preserves a clear quantity & or expensive surface tallies required \\
         \hline
-        \#2 & & Source spectrum undefined & $F(\vr_0)$ is constant in diffusion \\
-        & & Difficult implementation & Tally tracked by region of flight \\
-        & & Unclear interpretation & See \cref{eq:def:2} \\
+        \#2 & Easy to tally & Fission required in all cells \\
+        & Inherently linear & Preservation is based not on total scalar flux preservation \\
         \hline
-        \#3 & CMM Compatible & Fission required & $F(\vr_0)$ is constant in diffusion \\
-        & Easy implementation & & Tally tracked by region of birth \\
-        & & & See \cref{eq:def:3} \\
-        \hline
-        \#4 & CMM Compatible & Fission required & $F(\vr_0)$ is constant in diffusion \\
-        & Easy implementation & Source spectrum undefined & Tally tracked by region of flight \\
-        & &  & See \cref{eq:def:4} \\
-        \hline
-        \#5 & & Fission required & $F(\vr_0)$ is taken directly from transport \\
-        & & Difficult implementation & Tally tracked by region of birth \\
-        & & Unclear interpretation & See \cref{eq:def:1} \\
-        & & Not backward compatible & \\
-        \hline
-        \#6 & & Source spectrum undefined & $F(\vr_0)$ is constant in diffusion \\
-        & & Difficult implementation & Tally tracked by region of flight \\
-        & & Unclear interpretation & See \cref{eq:def:2} \\
+        \#3 & Easy to tally & Fission required in all cells \\
+        & Inherently linear & Preservation is not for the homogenized color set problem \\
         \hline
     \end{tabular}
 \end{table}
